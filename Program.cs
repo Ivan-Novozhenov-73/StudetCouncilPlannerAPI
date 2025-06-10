@@ -45,6 +45,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<TaskService>();
 
 // JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
