@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.Dtos;
 using StudetCouncilPlannerAPI.Services;
+using System.Security.Claims;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
@@ -58,7 +59,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<ActionResult<Guid>> CreateEvent([FromBody] EventCreateDto dto)
         {
             // Здесь предполагается, что userId можно получить из JWT-токена
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "sub");
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             if (userIdClaim == null) return Unauthorized();
             Guid userId = Guid.Parse(userIdClaim.Value);
 

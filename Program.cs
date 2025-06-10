@@ -67,6 +67,7 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
     };
 });
+Console.WriteLine($"JWT KEY = {jwtSettings["Key"]}");
 
 var app = builder.Build();
 
@@ -81,7 +82,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

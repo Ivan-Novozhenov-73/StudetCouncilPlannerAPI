@@ -159,7 +159,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Добавить участника
         public async Task<bool> AddParticipantAsync(Guid eventId, Guid userId)
         {
-            var exists = await _context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId && eu.Role == 0);
+            var exists = await _context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId);
             if (exists) return false;
 
             _context.EventUsers.Add(new EventUser
@@ -186,7 +186,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Добавить организатора
         public async Task<bool> AddOrganizerAsync(Guid eventId, Guid userId)
         {
-            var exists = await _context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId && eu.Role == 1);
+            var exists = await _context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId);
             if (exists) return false;
 
             _context.EventUsers.Add(new EventUser
