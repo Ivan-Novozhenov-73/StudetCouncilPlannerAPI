@@ -141,3 +141,12 @@ D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\obj\Debug\net8.0\refint
 D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\obj\Debug\net8.0\StudetCouncilPlannerAPI.pdb
 D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\obj\Debug\net8.0\StudetCouncilPlannerAPI.genruntimeconfig.cache
 D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\obj\Debug\net8.0\ref\StudetCouncilPlannerAPI.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\Projects\StudetCouncilPlanner\StudetCouncilPlannerAPI\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
