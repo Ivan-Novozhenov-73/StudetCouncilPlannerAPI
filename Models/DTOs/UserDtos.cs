@@ -32,6 +32,7 @@ namespace StudetCouncilPlannerAPI.Models.DTOs
         public long Phone { get; set; }
         public string Contacts { get; set; }
         public short Role { get; set; }
+        public bool Archive { get; set; }
     }
 
     // DTO для выдачи ответа при аутентификации
