@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using StudetCouncilPlannerAPI.Data;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
@@ -15,6 +16,7 @@ namespace StudetCouncilPlannerAPI.Controllers
     public class TaskController : ControllerBase
     {
         private readonly TaskService _taskService;
+        private readonly ApplicationDbContext _context;
 
         public TaskController(TaskService taskService)
         {

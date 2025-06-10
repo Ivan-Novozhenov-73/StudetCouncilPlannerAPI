@@ -25,7 +25,7 @@ namespace StudetCouncilPlannerAPI.Services
             {
                 TaskId = Guid.NewGuid(),
                 Title = dto.Title,
-                Status = 0, // "сделать"
+                Status = 0,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 EventId = dto.EventId,

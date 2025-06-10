@@ -24,8 +24,8 @@ namespace StudetCouncilPlannerAPI.Models.Entities
         public DateOnly EndDate { get; set; }
 
         // Навигационные свойства
-        public required Event Event { get; set; }
-        public required Partner Partner { get; set; }
-        public required ICollection<TaskUser> TaskUsers { get; set; }
+        public Event Event { get; set; }
+        public Partner Partner { get; set; }
+        public ICollection<TaskUser> TaskUsers { get; set; }
     }
 }
