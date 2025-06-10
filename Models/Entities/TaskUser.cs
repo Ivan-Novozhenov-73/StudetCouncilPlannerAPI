@@ -1,10 +1,13 @@
-public class TaskUser
+namespace StudetCouncilPlannerAPI.Models.Entities
 {
-    public Guid UserId { get; set; }
-    public User User { get; set; }
+    public class TaskUser
+    {
+        public Guid UserId { get; set; }
+        public User User { get; set; }
 
-    public Guid TaskId { get; set; }
-    public Task Task { get; set; }
+        public Guid TaskId { get; set; }
+        public Task Task { get; set; }
 
-    public short Role { get; set; }
+        public short Role { get; set; }
+    }
 }

@@ -1,8 +1,12 @@
-public class EventPartner
+namespace StudetCouncilPlannerAPI.Models.Entities
 {
-    public Guid PartnerId { get; set; }
-    public Partner Partner { get; set; }
 
-    public Guid EventId { get; set; }
-    public Event Event { get; set; }
+    public class EventPartner
+    {
+        public Guid PartnerId { get; set; }
+        public Partner Partner { get; set; }
+
+        public Guid EventId { get; set; }
+        public Event Event { get; set; }
+    }
 }

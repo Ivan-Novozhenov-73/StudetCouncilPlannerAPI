@@ -12,7 +12,7 @@ namespace StudetCouncilPlannerAPI.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Event> Events { get; set; }
-        public DbSet<Task> Tasks { get; set; }
+        public DbSet<Models.Entities.Task> Tasks { get; set; }
         public DbSet<Partner> Partners { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<Note> Notes { get; set; }
@@ -89,13 +89,13 @@ namespace StudetCouncilPlannerAPI.Data
                 .HasForeignKey(ep => ep.EventId);
 
             // Task
-            modelBuilder.Entity<Task>()
+            modelBuilder.Entity<Models.Entities.Task>()
                 .HasOne(t => t.Event)
                 .WithMany(e => e.Tasks)
                 .HasForeignKey(t => t.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Task>()
+            modelBuilder.Entity<Models.Entities.Task>()
                 .HasOne(t => t.Partner)
                 .WithMany(p => p.Tasks)
                 .HasForeignKey(t => t.PartnerId)

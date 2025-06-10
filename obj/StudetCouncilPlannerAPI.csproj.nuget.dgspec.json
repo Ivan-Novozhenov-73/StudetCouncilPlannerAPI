@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projects\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj": {}
+    "D:\\Projects\\StudetCouncilPlanner\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj": {}
   },
   "projects": {
-    "D:\\Projects\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj": {
+    "D:\\Projects\\StudetCouncilPlanner\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj",
+        "projectUniqueName": "D:\\Projects\\StudetCouncilPlanner\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj",
         "projectName": "StudetCouncilPlannerAPI",
-        "projectPath": "D:\\Projects\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj",
+        "projectPath": "D:\\Projects\\StudetCouncilPlanner\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj",
         "packagesPath": "C:\\Users\\ivann\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects\\StudetCouncilPlannerAPI\\obj\\",
+        "outputPath": "D:\\Projects\\StudetCouncilPlanner\\StudetCouncilPlannerAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Programs\\Visual Studio\\Shared\\NuGetPackages"
@@ -58,6 +58,12 @@
               "version": "[8.0.16, )"
             },
             "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.5, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.5, )"
             },
