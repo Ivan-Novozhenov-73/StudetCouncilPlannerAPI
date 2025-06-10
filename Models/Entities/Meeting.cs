@@ -10,7 +10,7 @@ namespace StudetCouncilPlannerAPI.Models.Entities
         public string Title { get; set; }
 
         [Required]
-        public DateTime MeetingDate { get; set; }
+        public DateOnly MeetingDate { get; set; }
 
         [Required]
         public TimeSpan MeetingTime { get; set; }

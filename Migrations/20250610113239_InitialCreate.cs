@@ -19,8 +19,8 @@ namespace StudetCouncilPlannerAPI.Migrations
                     Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Status = table.Column<short>(type: "smallint", nullable: false),
                     Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    StartDate = table.Column<DateOnly>(type: "timestamp with time zone", nullable: true),
+                    EndDate = table.Column<DateOnly>(type: "timestamp with time zone", nullable: true),
                     EventTime = table.Column<TimeSpan>(type: "interval", nullable: true),
                     Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     NumberOfParticipants = table.Column<short>(type: "smallint", nullable: true)
@@ -36,7 +36,7 @@ namespace StudetCouncilPlannerAPI.Migrations
                 {
                     MeetingId = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    MeetingDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    MeetingDate = table.Column<DateOnly>(type: "timestamp with time zone", nullable: false),
                     MeetingTime = table.Column<TimeSpan>(type: "interval", nullable: false),
                     Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Link = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
@@ -118,8 +118,8 @@ namespace StudetCouncilPlannerAPI.Migrations
                     PartnerId = table.Column<Guid>(type: "uuid", nullable: true),
                     Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Status = table.Column<short>(type: "smallint", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    StartDate = table.Column<DateOnly>(type: "timestamp with time zone", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

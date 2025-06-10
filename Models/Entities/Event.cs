@@ -15,8 +15,8 @@ namespace StudetCouncilPlannerAPI.Models.Entities
         [Required, MaxLength(255)]
         public string Description { get; set; }
 
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public TimeSpan? EventTime { get; set; }
         [MaxLength(255)]
         public string? Location { get; set; }

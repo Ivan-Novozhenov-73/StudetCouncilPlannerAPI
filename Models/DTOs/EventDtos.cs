@@ -10,8 +10,8 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
         public string Title { get; set; }
         public short Status { get; set; }
         public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public string? Location { get; set; }
         public TimeSpan? EventTime { get; set; }
         public short? NumberOfParticipants { get; set; }
@@ -24,8 +24,8 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
         public string Title { get; set; }
         public short Status { get; set; }
         public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public TimeSpan? EventTime { get; set; }
         public string? Location { get; set; }
         public short? NumberOfParticipants { get; set; }
@@ -42,8 +42,8 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public TimeSpan? EventTime { get; set; }
         public string? Location { get; set; }
         public short? NumberOfParticipants { get; set; }
@@ -56,8 +56,8 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public short Status { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public TimeSpan? EventTime { get; set; }
         public string? Location { get; set; }
         public short? NumberOfParticipants { get; set; }
