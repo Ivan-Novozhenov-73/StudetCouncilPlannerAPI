@@ -97,7 +97,7 @@ namespace StudetCouncilPlannerAPI.Services
                 Location = ev.Location,
                 NumberOfParticipants = ev.NumberOfParticipants,
                 Tasks = ev.Tasks.Select(t => new EventTaskShortDto { TaskId = t.TaskId, Title = t.Title }).ToList(),
-                Notes = ev.Notes.Select(n => new NoteShortDto { NoteId = n.NoteId, Title = n.Title }).ToList(),
+                Notes = ev.Notes.Select(n => new EventNoteShortDto { NoteId = n.NoteId, Title = n.Title }).ToList(),
                 Organizers = organizers,
                 Participants = participants,
                 Partners = ev.EventPartners.Select(ep => new EventPartnerShortDto

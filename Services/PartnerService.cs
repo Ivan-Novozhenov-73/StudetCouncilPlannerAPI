@@ -103,7 +103,7 @@ namespace StudetCouncilPlannerAPI.Services
                 {
                     PartnerId = p.PartnerId,
                     Fio = p.Surname + " " + p.Name + (p.Patronymic != null ? " " + p.Patronymic : ""),
-                    Archive = p.Archive
+                    Description = p.Description
                 })
                 .ToListAsync();
         }

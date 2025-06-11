@@ -31,7 +31,7 @@ namespace StudetCouncilPlannerAPI.Models.DTOs
     {
         public Guid PartnerId { get; set; }
         public string Fio { get; set; } // ФИО в одну строку
-        public bool Archive { get; set; }
+        public string? Description { get; set; }
     }
 
     // Для детального вывода, включая связи
