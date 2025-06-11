@@ -30,7 +30,7 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
         public string? Location { get; set; }
         public short? NumberOfParticipants { get; set; }
 
-        public List<TaskShortDto> Tasks { get; set; }
+        public List<EventTaskShortDto> Tasks { get; set; }
         public List<NoteShortDto> Notes { get; set; }
         public List<UserShortDto> Organizers { get; set; }
         public List<UserShortDto> Participants { get; set; }
@@ -74,7 +74,7 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
     }
 
     // Краткая информация для связанных сущностей
-    public class TaskShortDto
+    public class EventTaskShortDto
     {
         public Guid TaskId { get; set; }
         public string Title { get; set; }

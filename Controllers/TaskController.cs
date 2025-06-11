@@ -18,9 +18,10 @@ namespace StudetCouncilPlannerAPI.Controllers
         private readonly TaskService _taskService;
         private readonly ApplicationDbContext _context;
 
-        public TaskController(TaskService taskService)
+        public TaskController(TaskService taskService, ApplicationDbContext context)
         {
             _taskService = taskService;
+            _context = context;
         }
 
         // Получить задачу по ID
@@ -38,6 +39,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         {
             var currentUserId = GetCurrentUserId();
             var user = await _context.Users.FindAsync(currentUserId);
+            Console.WriteLine($"[TaskController.Create] user: {user}, user.Role: {user?.Role}");
             if (user == null) return Forbid();
 
             if (user.Role != 1 && user.Role != 2)
