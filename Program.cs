@@ -49,7 +49,7 @@ builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<PartnerService>();
 builder.Services.AddScoped<NoteService>();
-
+builder.Services.AddScoped<MeetingService>();
 
 // JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
