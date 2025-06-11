@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using StudetCouncilPlannerAPI.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
@@ -40,10 +41,18 @@ namespace StudetCouncilPlannerAPI.Controllers
             var currentUserId = GetCurrentUserId();
             var user = await _context.Users.FindAsync(currentUserId);
             Console.WriteLine($"[TaskController.Create] user: {user}, user.Role: {user?.Role}");
-            if (user == null) return Forbid();
-
-            if (user.Role != 1 && user.Role != 2)
+            if (user == null || (user.Role != 1 && user.Role != 2))
                 return Forbid();
+
+            bool isMainOrganizer = await _context.EventUsers
+                .AnyAsync(eu => eu.EventId == dto.EventId && eu.UserId == currentUserId && eu.Role == 2);
+            if (!isMainOrganizer)
+                return Forbid();
+
+            bool executorIsAllowed = await _context.EventUsers
+                .AnyAsync(eu => eu.EventId == dto.EventId && eu.UserId == dto.ExecutorUserId && (eu.Role == 1 || eu.Role == 2));
+            if (!executorIsAllowed)
+                return BadRequest("Executor must be organizer or main organizer of event.");
 
             var taskId = await _taskService.CreateTaskAsync(dto, currentUserId);
             return CreatedAtAction(nameof(GetById), new { taskId }, taskId);
