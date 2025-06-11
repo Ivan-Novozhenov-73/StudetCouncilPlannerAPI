@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "/Ax5igo9hCM=",
+  "dgSpecHash": "lMH110M3LJE=",
   "success": true,
   "projectFilePath": "D:\\Projects\\StudetCouncilPlanner\\StudetCouncilPlannerAPI\\StudetCouncilPlannerAPI.csproj",
   "expectedPackageFiles": [
@@ -68,6 +68,7 @@
     "C:\\Users\\ivann\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\ivann\\.nuget\\packages\\npgsql\\9.0.3\\npgsql.9.0.3.nupkg.sha512",
     "C:\\Users\\ivann\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\9.0.4\\npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
+    "C:\\Users\\ivann\\.nuget\\packages\\questpdf\\2025.5.1\\questpdf.2025.5.1.nupkg.sha512",
     "C:\\Users\\ivann\\.nuget\\packages\\swashbuckle.aspnetcore\\6.6.2\\swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
     "C:\\Users\\ivann\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.6.2\\swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",
     "C:\\Users\\ivann\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.6.2\\swashbuckle.aspnetcore.swaggergen.6.6.2.nupkg.sha512",

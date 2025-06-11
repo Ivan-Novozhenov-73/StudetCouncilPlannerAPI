@@ -6,6 +6,10 @@ using System.Text;
 using StudetCouncilPlannerAPI.Services;
 using Microsoft.OpenApi.Models;
 using StudetCouncilPlannerAPI.Models.Entities;
+using QuestPDF;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +54,7 @@ builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<PartnerService>();
 builder.Services.AddScoped<NoteService>();
 builder.Services.AddScoped<MeetingService>();
+builder.Services.AddScoped<EventReportService>();
 
 // JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
