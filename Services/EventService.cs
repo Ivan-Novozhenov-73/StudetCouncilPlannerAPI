@@ -15,7 +15,7 @@ namespace StudetCouncilPlannerAPI.Services
         }
 
         // Получить список мероприятий (с фильтрацией, пагинацией, сортировкой)
-        public async Task<List<EventListItemDto>> GetEventsAsync(EventListQueryDto query)
+        public async Task<List<EventShortDto>> GetEventsAsync(EventListQueryDto query)
         {
             var eventsQuery = _context.Events.AsQueryable();
 
@@ -41,7 +41,7 @@ namespace StudetCouncilPlannerAPI.Services
                 .ToListAsync();
 
             // Преобразование в DTO
-            return events.Select(e => new EventListItemDto
+            return events.Select(e => new EventShortDto
             {
                 EventId = e.EventId,
                 Title = e.Title,
@@ -100,7 +100,7 @@ namespace StudetCouncilPlannerAPI.Services
                 Notes = ev.Notes.Select(n => new NoteShortDto { NoteId = n.NoteId, Title = n.Title }).ToList(),
                 Organizers = organizers,
                 Participants = participants,
-                Partners = ev.EventPartners.Select(ep => new PartnerShortDto
+                Partners = ev.EventPartners.Select(ep => new EventPartnerShortDto
                 {
                     PartnerId = ep.PartnerId,
                     Name = ep.Partner.Name + " " + ep.Partner.Surname
@@ -237,7 +237,7 @@ namespace StudetCouncilPlannerAPI.Services
         }
 
         // Получить мероприятия пользователя
-        public async Task<List<EventListItemDto>> GetUserEventsAsync(Guid userId)
+        public async Task<List<EventShortDto>> GetUserEventsAsync(Guid userId)
         {
             var events = await _context.EventUsers
                 .Where(eu => eu.UserId == userId)
@@ -245,7 +245,7 @@ namespace StudetCouncilPlannerAPI.Services
                 .OrderByDescending(e => e.StartDate)
                 .ToListAsync();
 
-            return events.Select(e => new EventListItemDto
+            return events.Select(e => new EventShortDto
             {
                 EventId = e.EventId,
                 Title = e.Title,
@@ -291,12 +291,12 @@ namespace StudetCouncilPlannerAPI.Services
         }
 
         // Получить список партнеров мероприятия
-        public async Task<List<PartnerShortDto>> GetPartnersAsync(Guid eventId)
+        public async Task<List<EventPartnerShortDto>> GetPartnersAsync(Guid eventId)
         {
             var partners = await _context.EventPartners
                 .Where(ep => ep.EventId == eventId)
                 .Include(ep => ep.Partner)
-                .Select(ep => new PartnerShortDto
+                .Select(ep => new EventPartnerShortDto
                 {
                     PartnerId = ep.PartnerId,
                     Name = ep.Partner.Name + " " + ep.Partner.Surname

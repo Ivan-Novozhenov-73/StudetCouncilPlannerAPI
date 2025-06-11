@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace StudetCouncilPlannerAPI.Models.Dtos
 {
     // Краткая информация о мероприятии
-    public class EventListItemDto
+    public class EventShortDto
     {
         public Guid EventId { get; set; }
         public string Title { get; set; }
@@ -34,7 +34,7 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
         public List<NoteShortDto> Notes { get; set; }
         public List<UserShortDto> Organizers { get; set; }
         public List<UserShortDto> Participants { get; set; }
-        public List<PartnerShortDto> Partners { get; set; }
+        public List<EventPartnerShortDto> Partners { get; set; }
     }
 
     // Для создания мероприятия
@@ -90,7 +90,7 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
         public string FullName { get; set; }
         public short Role { get; set; }
     }
-    public class PartnerShortDto
+    public class EventPartnerShortDto
     {
         public Guid PartnerId { get; set; }
         public string Name { get; set; }

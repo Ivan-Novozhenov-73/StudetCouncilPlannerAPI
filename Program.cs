@@ -46,6 +46,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<TaskService>();
+builder.Services.AddScoped<PartnerService>();
 
 // JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");

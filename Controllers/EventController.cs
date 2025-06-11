@@ -19,7 +19,7 @@ namespace StudetCouncilPlannerAPI.Controllers
 
         // GET: api/Event
         [HttpGet]
-        public async Task<ActionResult<List<EventListItemDto>>> GetEvents([FromQuery] EventListQueryDto query)
+        public async Task<ActionResult<List<EventShortDto>>> GetEvents([FromQuery] EventListQueryDto query)
         {
             var events = await _eventService.GetEventsAsync(query);
             return Ok(events);
@@ -27,7 +27,7 @@ namespace StudetCouncilPlannerAPI.Controllers
 
         // GET: api/Event/actual
         [HttpGet("actual")]
-        public async Task<ActionResult<List<EventListItemDto>>> GetActualEvents([FromQuery] EventListQueryDto query)
+        public async Task<ActionResult<List<EventShortDto>>> GetActualEvents([FromQuery] EventListQueryDto query)
         {
             query.IsActual = true;
             var events = await _eventService.GetEventsAsync(query);
@@ -36,7 +36,7 @@ namespace StudetCouncilPlannerAPI.Controllers
 
         // GET: api/Event/archive
         [HttpGet("archive")]
-        public async Task<ActionResult<List<EventListItemDto>>> GetArchiveEvents([FromQuery] EventListQueryDto query)
+        public async Task<ActionResult<List<EventShortDto>>> GetArchiveEvents([FromQuery] EventListQueryDto query)
         {
             query.IsActual = false;
             var events = await _eventService.GetEventsAsync(query);
@@ -80,7 +80,7 @@ namespace StudetCouncilPlannerAPI.Controllers
 
         // GET: api/Event/user/{userId}
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<List<EventListItemDto>>> GetUserEvents(Guid userId)
+        public async Task<ActionResult<List<EventShortDto>>> GetUserEvents(Guid userId)
         {
             var events = await _eventService.GetUserEventsAsync(userId);
             return Ok(events);
@@ -170,7 +170,7 @@ namespace StudetCouncilPlannerAPI.Controllers
 
         // GET: api/Event/{eventId}/partners
         [HttpGet("{eventId}/partners")]
-        public async Task<ActionResult<List<PartnerShortDto>>> GetPartners(Guid eventId)
+        public async Task<ActionResult<List<EventPartnerShortDto>>> GetPartners(Guid eventId)
         {
             var partners = await _eventService.GetPartnersAsync(eventId);
             return Ok(partners);
