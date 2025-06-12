@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using StudetCouncilPlannerAPI.Interfaces;
 using StudetCouncilPlannerAPI.Models.DTOs;
-using StudetCouncilPlannerAPI.Services;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class AuthController(AuthService authService) : ControllerBase
+    public class AuthController(IAuthService authService) : ControllerBase
     {
         [HttpPost("register"), AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto dto) =>

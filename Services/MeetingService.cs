@@ -1,53 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using StudetCouncilPlannerAPI.Data;
+using StudetCouncilPlannerAPI.Interfaces;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Models.Entities;
 
 namespace StudetCouncilPlannerAPI.Services
 {
-    public class MeetingService
+    public class MeetingService(ApplicationDbContext context) : IMeetingService
     {
-        private readonly ApplicationDbContext _context;
-
-        public MeetingService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // Проверка глобальной роли пользователя (1 — глава, 2 — председатель)
-        private async Task<bool> IsUserCouncilHeadOrChairAsync(Guid userId)
-        {
-            var user = await _context.Users.FindAsync(userId);
-            return user != null && (user.Role == 1 || user.Role == 2);
-        }
-
-        // Получить организатора встречи (MeetingUser с Role == 1)
-        private async Task<MeetingUser?> GetMeetingOrganizerAsync(Guid meetingId)
-        {
-            return await _context.MeetingUsers
-                .Include(mu => mu.User)
-                .FirstOrDefaultAsync(mu => mu.MeetingId == meetingId && mu.Role == 1);
-        }
-
-        // Проверка, является ли пользователь организатором данной встречи
-        public async Task<bool> IsOrganizerAsync(Guid meetingId, Guid userId)
-        {
-            return await _context.MeetingUsers.AnyAsync(mu =>
-                mu.MeetingId == meetingId && mu.UserId == userId && mu.Role == 1);
-        }
-
-        // Проверка, является ли пользователь участником или организатором встречи
-        public async Task<bool> IsParticipantOrOrganizerAsync(Guid meetingId, Guid userId)
-        {
-            return await _context.MeetingUsers.AnyAsync(mu =>
-                mu.MeetingId == meetingId && mu.UserId == userId);
-        }
-
         // Создание встречи (только глава или председатель студсовета)
         public async Task<Guid?> CreateMeetingAsync(MeetingCreateDto dto, Guid creatorId)
         {
@@ -73,8 +33,8 @@ namespace StudetCouncilPlannerAPI.Services
                 Role = 1 // организатор
             });
 
-            _context.Meetings.Add(meeting);
-            await _context.SaveChangesAsync();
+            context.Meetings.Add(meeting);
+            await context.SaveChangesAsync();
             return meeting.MeetingId;
         }
 
@@ -86,7 +46,7 @@ namespace StudetCouncilPlannerAPI.Services
                 return false;
 
             // Нельзя добавить организатора или дублировать участника
-            if (await _context.MeetingUsers.AnyAsync(mu => mu.MeetingId == meetingId && mu.UserId == dto.UserId))
+            if (await context.MeetingUsers.AnyAsync(mu => mu.MeetingId == meetingId && mu.UserId == dto.UserId))
                 return false;
 
             // Добавляем участника (роль 0)
@@ -96,8 +56,8 @@ namespace StudetCouncilPlannerAPI.Services
                 UserId = dto.UserId,
                 Role = 0
             };
-            _context.MeetingUsers.Add(meetingUser);
-            await _context.SaveChangesAsync();
+            context.MeetingUsers.Add(meetingUser);
+            await context.SaveChangesAsync();
             return true;
         }
 
@@ -112,20 +72,20 @@ namespace StudetCouncilPlannerAPI.Services
             if (dto.UserId == organizerId)
                 return false;
 
-            var meetingUser = await _context.MeetingUsers
+            var meetingUser = await context.MeetingUsers
                 .FirstOrDefaultAsync(mu => mu.MeetingId == meetingId && mu.UserId == dto.UserId && mu.Role == 0);
             if (meetingUser == null)
                 return false;
 
-            _context.MeetingUsers.Remove(meetingUser);
-            await _context.SaveChangesAsync();
+            context.MeetingUsers.Remove(meetingUser);
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Получение всех встреч пользователя (организатор или участник)
         public async Task<List<MeetingShortDto>> GetUserMeetingsAsync(Guid userId)
         {
-            var meetings = await _context.MeetingUsers
+            var meetings = await context.MeetingUsers
                 .Where(mu => mu.UserId == userId)
                 .Include(mu => mu.Meeting)
                 .ThenInclude(m => m.MeetingUsers)
@@ -163,7 +123,7 @@ namespace StudetCouncilPlannerAPI.Services
             if (!await IsParticipantOrOrganizerAsync(meetingId, userId))
                 return null;
 
-            var meeting = await _context.Meetings
+            var meeting = await context.Meetings
                 .Include(m => m.MeetingUsers)
                     .ThenInclude(mu => mu.User)
                 .FirstOrDefaultAsync(m => m.MeetingId == meetingId);
@@ -200,6 +160,35 @@ namespace StudetCouncilPlannerAPI.Services
                 Organizer = organizer,
                 Participants = participants
             };
+        }
+        
+        // Проверка глобальной роли пользователя (1 — глава, 2 — председатель)
+        private async Task<bool> IsUserCouncilHeadOrChairAsync(Guid userId)
+        {
+            var user = await context.Users.FindAsync(userId);
+            return user != null && (user.Role == 1 || user.Role == 2);
+        }
+
+        // Получить организатора встречи (MeetingUser с Role == 1)
+        private async Task<MeetingUser?> GetMeetingOrganizerAsync(Guid meetingId)
+        {
+            return await context.MeetingUsers
+                .Include(mu => mu.User)
+                .FirstOrDefaultAsync(mu => mu.MeetingId == meetingId && mu.Role == 1);
+        }
+        
+        // Проверка, является ли пользователь организатором данной встречи
+        private async Task<bool> IsOrganizerAsync(Guid meetingId, Guid userId)
+        {
+            return await context.MeetingUsers.AnyAsync(mu =>
+                mu.MeetingId == meetingId && mu.UserId == userId && mu.Role == 1);
+        }
+
+        // Проверка, является ли пользователь участником или организатором встречи
+        private async Task<bool> IsParticipantOrOrganizerAsync(Guid meetingId, Guid userId)
+        {
+            return await context.MeetingUsers.AnyAsync(mu =>
+                mu.MeetingId == meetingId && mu.UserId == userId);
         }
     }
 }

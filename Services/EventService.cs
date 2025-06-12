@@ -2,22 +2,16 @@ using StudetCouncilPlannerAPI.Models.Entities;
 using StudetCouncilPlannerAPI.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 using StudetCouncilPlannerAPI.Data;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Services
 {
-    public class EventService
+    public class EventService(ApplicationDbContext context) : IEventService
     {
-        private readonly ApplicationDbContext _context;
-
-        public EventService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // Получить список мероприятий (с фильтрацией, пагинацией, сортировкой)
+       // Получить список мероприятий (с фильтрацией, пагинацией, сортировкой)
         public async Task<List<EventShortDto>> GetEventsAsync(EventListQueryDto query)
         {
-            var eventsQuery = _context.Events.AsQueryable();
+            var eventsQuery = context.Events.AsQueryable();
 
             if (!string.IsNullOrEmpty(query.Search))
                 eventsQuery = eventsQuery.Where(e => e.Title.Contains(query.Search) || e.Description.Contains(query.Search));
@@ -57,7 +51,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить мероприятие по id
         public async Task<EventDetailDto?> GetEventByIdAsync(Guid eventId)
         {
-            var ev = await _context.Events
+            var ev = await context.Events
                 .Include(e => e.Tasks)
                 .Include(e => e.Notes)
                 .Include(e => e.EventUsers).ThenInclude(eu => eu.User)
@@ -132,15 +126,15 @@ namespace StudetCouncilPlannerAPI.Services
                 }
             };
 
-            _context.Events.Add(ev);
-            await _context.SaveChangesAsync();
+            context.Events.Add(ev);
+            await context.SaveChangesAsync();
             return ev.EventId;
         }
 
         // Изменить мероприятие
         public async Task<bool> UpdateEventAsync(Guid eventId, EventUpdateDto dto)
         {
-            var ev = await _context.Events.FirstOrDefaultAsync(e => e.EventId == eventId);
+            var ev = await context.Events.FirstOrDefaultAsync(e => e.EventId == eventId);
             if (ev == null) return false;
 
             ev.Title = dto.Title;
@@ -152,94 +146,94 @@ namespace StudetCouncilPlannerAPI.Services
             ev.Location = dto.Location;
             ev.NumberOfParticipants = dto.NumberOfParticipants;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Добавить участника
         public async Task<bool> AddParticipantAsync(Guid eventId, Guid userId)
         {
-            var exists = await _context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId);
+            var exists = await context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId);
             if (exists) return false;
 
-            _context.EventUsers.Add(new EventUser
+            context.EventUsers.Add(new EventUser
             {
                 EventId = eventId,
                 UserId = userId,
                 Role = 0 // участник
             });
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Удалить участника
         public async Task<bool> RemoveParticipantAsync(Guid eventId, Guid userId)
         {
-            var eu = await _context.EventUsers.FirstOrDefaultAsync(eu => eu.EventId == eventId && eu.UserId == userId && eu.Role == 0);
+            var eu = await context.EventUsers.FirstOrDefaultAsync(eu => eu.EventId == eventId && eu.UserId == userId && eu.Role == 0);
             if (eu == null) return false;
 
-            _context.EventUsers.Remove(eu);
-            await _context.SaveChangesAsync();
+            context.EventUsers.Remove(eu);
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Добавить организатора
         public async Task<bool> AddOrganizerAsync(Guid eventId, Guid userId)
         {
-            var exists = await _context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId);
+            var exists = await context.EventUsers.AnyAsync(eu => eu.EventId == eventId && eu.UserId == userId);
             if (exists) return false;
 
-            _context.EventUsers.Add(new EventUser
+            context.EventUsers.Add(new EventUser
             {
                 EventId = eventId,
                 UserId = userId,
                 Role = 1 // организатор
             });
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Удалить организатора
         public async Task<bool> RemoveOrganizerAsync(Guid eventId, Guid userId)
         {
-            var eu = await _context.EventUsers.FirstOrDefaultAsync(eu => eu.EventId == eventId && eu.UserId == userId && eu.Role == 1);
+            var eu = await context.EventUsers.FirstOrDefaultAsync(eu => eu.EventId == eventId && eu.UserId == userId && eu.Role == 1);
             if (eu == null) return false;
 
-            _context.EventUsers.Remove(eu);
-            await _context.SaveChangesAsync();
+            context.EventUsers.Remove(eu);
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Добавить партнера
         public async Task<bool> AddPartnerAsync(Guid eventId, Guid partnerId)
         {
-            var exists = await _context.EventPartners.AnyAsync(ep => ep.EventId == eventId && ep.PartnerId == partnerId);
+            var exists = await context.EventPartners.AnyAsync(ep => ep.EventId == eventId && ep.PartnerId == partnerId);
             if (exists) return false;
 
-            _context.EventPartners.Add(new EventPartner
+            context.EventPartners.Add(new EventPartner
             {
                 EventId = eventId,
                 PartnerId = partnerId
             });
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Удалить партнера
         public async Task<bool> RemovePartnerAsync(Guid eventId, Guid partnerId)
         {
-            var ep = await _context.EventPartners.FirstOrDefaultAsync(ep => ep.EventId == eventId && ep.PartnerId == partnerId);
+            var ep = await context.EventPartners.FirstOrDefaultAsync(ep => ep.EventId == eventId && ep.PartnerId == partnerId);
             if (ep == null) return false;
 
-            _context.EventPartners.Remove(ep);
-            await _context.SaveChangesAsync();
+            context.EventPartners.Remove(ep);
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Получить мероприятия пользователя
         public async Task<List<EventShortDto>> GetUserEventsAsync(Guid userId)
         {
-            var events = await _context.EventUsers
+            var events = await context.EventUsers
                 .Where(eu => eu.UserId == userId)
                 .Select(eu => eu.Event)
                 .OrderByDescending(e => e.StartDate)
@@ -261,7 +255,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить список организаторов мероприятия
         public async Task<List<UserShortDto>> GetOrganizersAsync(Guid eventId)
         {
-            var organizers = await _context.EventUsers
+            var organizers = await context.EventUsers
                 .Where(eu => eu.EventId == eventId && eu.Role == 1)
                 .Include(eu => eu.User)
                 .Select(eu => new UserShortDto
@@ -277,7 +271,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить список участников мероприятия
         public async Task<List<UserShortDto>> GetParticipantsAsync(Guid eventId)
         {
-            var participants = await _context.EventUsers
+            var participants = await context.EventUsers
                 .Where(eu => eu.EventId == eventId && eu.Role == 0)
                 .Include(eu => eu.User)
                 .Select(eu => new UserShortDto
@@ -293,7 +287,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить список партнеров мероприятия
         public async Task<List<EventPartnerShortDto>> GetPartnersAsync(Guid eventId)
         {
-            var partners = await _context.EventPartners
+            var partners = await context.EventPartners
                 .Where(ep => ep.EventId == eventId)
                 .Include(ep => ep.Partner)
                 .Select(ep => new EventPartnerShortDto

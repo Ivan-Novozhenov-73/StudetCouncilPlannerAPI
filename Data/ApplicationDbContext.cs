@@ -4,13 +4,8 @@ using Task = StudetCouncilPlannerAPI.Models.Entities.Task;
 
 namespace StudetCouncilPlannerAPI.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Task> Tasks { get; set; }

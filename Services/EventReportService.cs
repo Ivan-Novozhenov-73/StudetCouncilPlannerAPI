@@ -1,31 +1,16 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using StudetCouncilPlannerAPI.Data;
 using StudetCouncilPlannerAPI.Models.DTOs;
-using StudetCouncilPlannerAPI.Models.Entities;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using QuestPDF.Drawing;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Services
 {
-    public class EventReportService
+    public class EventReportService(ApplicationDbContext context) : IEventReportService
     {
-        private readonly ApplicationDbContext _context;
-
-        public EventReportService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        private static string DateToString(DateOnly? date) => date?.ToString("dd.MM.yyyy") ?? "—";
-        private static string TimeToString(TimeSpan? time) => time.HasValue ? time.Value.ToString(@"hh\:mm") : "—";
-
         /// <summary>
         /// Генерирует PDF с планом мероприятий на следующий месяц
         /// </summary>
@@ -39,7 +24,7 @@ namespace StudetCouncilPlannerAPI.Services
             var firstDay = new DateOnly(year, nextMonth, 1);
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
 
-            var events = await _context.Events
+            var events = await context.Events
                 .Include(e => e.EventUsers)
                     .ThenInclude(eu => eu.User)
                 .Where(e => e.EndDate >= firstDay && e.EndDate <= lastDay)
@@ -75,7 +60,7 @@ namespace StudetCouncilPlannerAPI.Services
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
             const short CompletedStatus = 4;
 
-            var events = await _context.Events
+            var events = await context.Events
                 .Include(e => e.EventUsers)
                     .ThenInclude(eu => eu.User)
                 .Where(e => e.EndDate >= firstDay && e.EndDate <= lastDay && e.Status == CompletedStatus)
@@ -117,14 +102,14 @@ namespace StudetCouncilPlannerAPI.Services
         /// </summary>
         public async Task<byte[]> GenerateUserEventsReportAsync(Guid userId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
                 throw new Exception("Пользователь не найден");
 
             const short CompletedStatus = 4;
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            var userEventRoles = await _context.EventUsers
+            var userEventRoles = await context.EventUsers
                 .Include(eu => eu.Event)
                 .Where(eu => eu.UserId == userId && eu.Event.Status == CompletedStatus && eu.Event.EndDate <= today)
                 .ToListAsync();
@@ -409,5 +394,10 @@ namespace StudetCouncilPlannerAPI.Services
                     _ => $"роль {role}"
                 };
         }
+        
+        private static string DateToString(DateOnly? date) => date?.ToString("dd.MM.yyyy") ?? "—";
+        private static string TimeToString(TimeSpan? time) => time.HasValue ? time.Value.ToString(@"hh\:mm") : "—";
+
+
     }
 }

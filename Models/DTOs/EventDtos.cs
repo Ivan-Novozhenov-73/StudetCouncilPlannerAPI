@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-
 namespace StudetCouncilPlannerAPI.Models.Dtos
 {
     // Краткая информация о мероприятии
     public class EventShortDto
     {
         public Guid EventId { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
         public short Status { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
         public string? Location { get; set; }
@@ -21,9 +18,9 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
     public class EventDetailDto
     {
         public Guid EventId { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
         public short Status { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
         public TimeSpan? EventTime { get; set; }
@@ -40,8 +37,8 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
     // Для создания мероприятия
     public class EventCreateDto
     {
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
         public TimeSpan? EventTime { get; set; }
@@ -53,8 +50,8 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
     // Для обновления мероприятия
     public class EventUpdateDto
     {
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public short Status { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
@@ -77,22 +74,22 @@ namespace StudetCouncilPlannerAPI.Models.Dtos
     public class EventTaskShortDto
     {
         public Guid TaskId { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
     }
     public class EventNoteShortDto
     {
         public Guid NoteId { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
     }
     public class UserShortDto
     {
         public Guid UserId { get; set; }
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
         public short Role { get; set; }
     }
     public class EventPartnerShortDto
     {
         public Guid PartnerId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

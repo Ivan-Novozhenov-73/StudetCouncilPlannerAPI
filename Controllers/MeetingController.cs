@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.DTOs;
-using StudetCouncilPlannerAPI.Services;
 using System.Security.Claims;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class MeetingController(MeetingService meetingService) : ControllerBase
+    public class MeetingController(IMeetingService meetingService) : ControllerBase
     {
         // Создать встречу (только глава или председатель студсовета)
         [HttpPost, Authorize]

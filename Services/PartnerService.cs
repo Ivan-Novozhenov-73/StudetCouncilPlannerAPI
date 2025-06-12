@@ -1,24 +1,13 @@
+using Microsoft.EntityFrameworkCore;
 using StudetCouncilPlannerAPI.Data;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Models.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using StudetCouncilPlannerAPI.Models.Dtos;
 
 namespace StudetCouncilPlannerAPI.Services
 {
-    public class PartnerService
+    public class PartnerService(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
-
-        public PartnerService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
         // Создать партнера
         public async Task<Guid> CreatePartnerAsync(PartnerCreateDto dto)
         {
@@ -33,15 +22,15 @@ namespace StudetCouncilPlannerAPI.Services
                 Contacts = dto.Contacts,
                 Archive = false
             };
-            _context.Partners.Add(partner);
-            await _context.SaveChangesAsync();
+            context.Partners.Add(partner);
+            await context.SaveChangesAsync();
             return partner.PartnerId;
         }
 
         // Обновить партнера
         public async Task<bool> UpdatePartnerAsync(Guid partnerId, PartnerUpdateDto dto)
         {
-            var partner = await _context.Partners.FirstOrDefaultAsync(p => p.PartnerId == partnerId);
+            var partner = await context.Partners.FirstOrDefaultAsync(p => p.PartnerId == partnerId);
             if (partner == null) return false;
 
             if (!string.IsNullOrWhiteSpace(dto.Surname)) partner.Surname = dto.Surname;
@@ -51,36 +40,36 @@ namespace StudetCouncilPlannerAPI.Services
             if (dto.Phone.HasValue) partner.Phone = dto.Phone.Value;
             if (!string.IsNullOrWhiteSpace(dto.Contacts)) partner.Contacts = dto.Contacts;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Архивировать партнера
         public async Task<bool> ArchivePartnerAsync(Guid partnerId)
         {
-            var partner = await _context.Partners.FirstOrDefaultAsync(p => p.PartnerId == partnerId);
+            var partner = await context.Partners.FirstOrDefaultAsync(p => p.PartnerId == partnerId);
             if (partner == null || partner.Archive) return false;
 
             partner.Archive = true;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Восстановить из архива
         public async Task<bool> RestorePartnerAsync(Guid partnerId)
         {
-            var partner = await _context.Partners.FirstOrDefaultAsync(p => p.PartnerId == partnerId);
+            var partner = await context.Partners.FirstOrDefaultAsync(p => p.PartnerId == partnerId);
             if (partner == null || !partner.Archive) return false;
 
             partner.Archive = false;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // Поиск и фильтрация
         public async Task<List<PartnerShortDto>> SearchPartnersAsync(PartnerFilterDto filter)
         {
-            var query = _context.Partners.AsQueryable();
+            var query = context.Partners.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filter.FioSearch))
             {
@@ -111,7 +100,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить партнера по id (детально)
         public async Task<PartnerDetailDto?> GetPartnerByIdAsync(Guid partnerId)
         {
-            var partner = await _context.Partners
+            var partner = await context.Partners
                 .Include(p => p.EventPartners).ThenInclude(ep => ep.Event)
                 .Include(p => p.Tasks)
                 .FirstOrDefaultAsync(p => p.PartnerId == partnerId);
@@ -150,7 +139,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить все задачи партнера
         public async Task<List<TaskShortDto>> GetTasksByPartnerAsync(Guid partnerId)
         {
-            return await _context.Tasks
+            return await context.Tasks
                 .Where(t => t.PartnerId == partnerId)
                 .Select(t => new TaskShortDto
                 {
@@ -165,7 +154,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить все мероприятия партнера
         public async Task<List<EventShortDto>> GetEventsByPartnerAsync(Guid partnerId)
         {
-            return await _context.EventPartners
+            return await context.EventPartners
                 .Where(ep => ep.PartnerId == partnerId)
                 .Select(ep => new EventShortDto
                 {

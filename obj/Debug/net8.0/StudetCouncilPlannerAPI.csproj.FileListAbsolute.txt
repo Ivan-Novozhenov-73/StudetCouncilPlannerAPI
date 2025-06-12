@@ -402,3 +402,4 @@ D:/Projects/StudetCouncilPlanner/StudetCouncilPlannerAPI/obj/Debug/net8.0/ref/St
 /Users/ilyaantonov/Downloads/four_course/IVAN/StudetCouncilPlannerAPI/obj/Debug/net8.0/StudetCouncilPlannerAPI.pdb
 /Users/ilyaantonov/Downloads/four_course/IVAN/StudetCouncilPlannerAPI/obj/Debug/net8.0/StudetCouncilPlannerAPI.genruntimeconfig.cache
 /Users/ilyaantonov/Downloads/four_course/IVAN/StudetCouncilPlannerAPI/obj/Debug/net8.0/ref/StudetCouncilPlannerAPI.dll
+/Users/ilyaantonov/Downloads/four_course/IVAN/StudetCouncilPlannerAPI/bin/Debug/net8.0/Swashbuckle.AspNetCore.ReDoc.dll

@@ -1,30 +1,20 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using StudetCouncilPlannerAPI.Data;
+using StudetCouncilPlannerAPI.Interfaces;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Models.Entities;
 
 namespace StudetCouncilPlannerAPI.Services
 {
-    public class AuthService
+    public class AuthService(ApplicationDbContext context, IConfiguration configuration) : IAuthService
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
-
-        public AuthService(ApplicationDbContext context, IConfiguration configuration)
-        {
-            _context = context;
-            _configuration = configuration;
-        }
-
         public async Task<UserDto> RegisterAsync(UserRegisterDto dto)
         {
-            if (await _context.Users.AnyAsync(x => x.Login == dto.Login))
+            if (await context.Users.AnyAsync(x => x.Login == dto.Login))
                 throw new Exception("Пользователь с таким логином уже существует.");
 
             var user = new User
@@ -41,15 +31,15 @@ namespace StudetCouncilPlannerAPI.Services
                 Role = 0 // или твой дефолтный роль
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
 
             return MapToDto(user);
         }
 
         public async Task<UserLoginResponseDto> LoginAsync(UserLoginDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Login == dto.Login);
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Login == dto.Login);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 throw new Exception("Неверный логин или пароль.");
 
@@ -64,14 +54,14 @@ namespace StudetCouncilPlannerAPI.Services
 
         private string GenerateJwtToken(User user)
         {
-            var jwtSettings = _configuration.GetSection("Jwt");
+            var jwtSettings = configuration.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Login),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
+                new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                new(JwtRegisteredClaimNames.UniqueName, user.Login),
+                new(ClaimTypes.Role, user.Role.ToString())
             };
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);

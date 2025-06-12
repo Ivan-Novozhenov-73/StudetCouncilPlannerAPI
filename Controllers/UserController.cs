@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Models.Entities;
-using StudetCouncilPlannerAPI.Services;
 using System.Security.Claims;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class UserController(UserService userService) : ControllerBase
+    public class UserController(IUserService userService) : ControllerBase
     {
         // Вспомогательный метод: получить текущего пользователя из токена/контекста
         private User GetCurrentUser()

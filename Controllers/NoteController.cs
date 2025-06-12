@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.DTOs;
-using StudetCouncilPlannerAPI.Services;
 using System.Security.Claims;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class NoteController(NoteService noteService) : ControllerBase
+    public class NoteController(INoteService noteService) : ControllerBase
     {
         // Получить список заметок для мероприятия
         [HttpGet("event/{eventId}"), Authorize]

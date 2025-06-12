@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StudetCouncilPlannerAPI.Services;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class EventReportController(EventReportService eventReportService) : ControllerBase
+    public class EventReportController(IEventReportService eventReportService) : ControllerBase
     {
         /// <summary>
         /// План мероприятий на следующий месяц (PDF) — только роль 2

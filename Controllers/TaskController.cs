@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.DTOs;
-using StudetCouncilPlannerAPI.Services;
 using System.Security.Claims;
 using StudetCouncilPlannerAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]"), Authorize]
-    public class TaskController(TaskService taskService, ApplicationDbContext context) : ControllerBase
+    public class TaskController(ITaskService taskService, ApplicationDbContext context) : ControllerBase
     {
         // Получить задачу по ID
         [HttpGet("{taskId}")]

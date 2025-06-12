@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-
 namespace StudetCouncilPlannerAPI.Models.DTOs
 {
     // DTO для создания задачи
     public class TaskCreateDto
     {
         public Guid EventId { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public Guid ExecutorUserId { get; set; }
@@ -17,7 +14,7 @@ namespace StudetCouncilPlannerAPI.Models.DTOs
     // DTO для изменения задачи (только для постановщика)
     public class TaskUpdateDto
     {
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public Guid ExecutorUserId { get; set; }
@@ -36,19 +33,19 @@ namespace StudetCouncilPlannerAPI.Models.DTOs
     {
         public Guid TaskId { get; set; }
         public Guid EventId { get; set; }
-        public string EventTitle { get; set; }
-        public string Title { get; set; }
+        public string EventTitle { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public short Status { get; set; }
 
         // Постановщик
         public Guid CreatorUserId { get; set; }
-        public string CreatorUserFullName { get; set; }
+        public string CreatorUserFullName { get; set; } = string.Empty;
 
         // Исполнитель
         public Guid ExecutorUserId { get; set; }
-        public string ExecutorUserFullName { get; set; }
+        public string ExecutorUserFullName { get; set; } = string.Empty;
 
         // Партнёр (если есть)
         public Guid? PartnerId { get; set; }

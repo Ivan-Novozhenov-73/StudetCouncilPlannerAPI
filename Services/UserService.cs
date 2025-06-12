@@ -1,23 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using StudetCouncilPlannerAPI.Data;
+using StudetCouncilPlannerAPI.Interfaces;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Models.Entities;
 
 namespace StudetCouncilPlannerAPI.Services
 {
-    public class UserService
+    public class UserService(ApplicationDbContext dbContext) : IUserService
     {
-        private readonly ApplicationDbContext _dbContext;
-
-        public UserService(ApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
         // Получить список пользователей с фильтрацией и пагинацией
         public async Task<List<UserDto>> GetUsersAsync(UserListQueryDto query)
         {
-            var usersQuery = _dbContext.Users.AsQueryable();
+            var usersQuery = dbContext.Users.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
@@ -53,14 +47,14 @@ namespace StudetCouncilPlannerAPI.Services
         // Получить пользователя по id
         public async Task<UserDto?> GetUserByIdAsync(Guid userId)
         {
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await dbContext.Users.FindAsync(userId);
             return user != null ? ToUserDto(user) : null;
         }
 
         // Обновить пользователя
         public async Task<bool> UpdateUserAsync(Guid userId, UserUpdateDto dto, User currentUser)
         {
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
                 return false;
 
@@ -75,7 +69,7 @@ namespace StudetCouncilPlannerAPI.Services
             user.Phone = dto.Phone ?? user.Phone;
             user.Contacts = dto.Contacts ?? user.Contacts;
 
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             return true;
         }
 
@@ -88,17 +82,17 @@ namespace StudetCouncilPlannerAPI.Services
             if (currentUser.UserId == userId)
             {
                 // Проверка: нельзя архивировать себя, если ты единственный неархивированный админ
-                int activeAdmins = await _dbContext.Users.CountAsync(u => u.Role == 2 && !u.Archive);
+                int activeAdmins = await dbContext.Users.CountAsync(u => u.Role == 2 && !u.Archive);
                 if (activeAdmins <= 1)
                     return false;
             }
 
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await dbContext.Users.FindAsync(userId);
             if (user == null || user.Archive)
                 return false;
 
             user.Archive = true;
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             return true;
         }
 
@@ -108,12 +102,12 @@ namespace StudetCouncilPlannerAPI.Services
             if (currentUser.Role != 2)
                 return false;
 
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.Archive)
                 return false;
 
             user.Archive = false;
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             return true;
         }
 
@@ -123,20 +117,20 @@ namespace StudetCouncilPlannerAPI.Services
             if (currentUser.Role != 2)
                 return false;
 
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await dbContext.Users.FindAsync(userId);
             if (user == null || user.Role == newRole)
                 return false;
 
             // Защита: нельзя понизить себя, если ты последний админ
             if (user.UserId == currentUser.UserId && user.Role == 2 && newRole != 2)
             {
-                int activeAdmins = await _dbContext.Users.CountAsync(u => u.Role == 2 && !u.Archive);
+                int activeAdmins = await dbContext.Users.CountAsync(u => u.Role == 2 && !u.Archive);
                 if (activeAdmins <= 1)
                     return false;
             }
 
             user.Role = newRole;
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             return true;
         }
 

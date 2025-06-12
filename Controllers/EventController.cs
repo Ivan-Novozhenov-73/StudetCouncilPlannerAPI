@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.Dtos;
-using StudetCouncilPlannerAPI.Services;
 using System.Security.Claims;
+using StudetCouncilPlannerAPI.Interfaces;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class EventController(EventService eventService) : ControllerBase
+    public class EventController(IEventService eventService) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<List<EventShortDto>>> GetEvents([FromQuery] EventListQueryDto query) => 

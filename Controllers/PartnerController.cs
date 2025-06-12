@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StudetCouncilPlannerAPI.Interfaces;
 using StudetCouncilPlannerAPI.Models.Dtos;
 using StudetCouncilPlannerAPI.Models.DTOs;
-using StudetCouncilPlannerAPI.Services;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
     [ApiController, Route("api/[controller]")]
-    public class PartnerController(PartnerService partnerService) : ControllerBase
+    public class PartnerController(IPartnerService partnerService) : ControllerBase
     {
         // 1. Создать партнера (роль 1 или 2)
         [HttpPost, Authorize(Roles = "1,2")]

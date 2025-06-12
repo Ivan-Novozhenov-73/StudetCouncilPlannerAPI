@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using StudetCouncilPlannerAPI.Models.Dtos;
 
 namespace StudetCouncilPlannerAPI.Models.DTOs
@@ -7,12 +5,12 @@ namespace StudetCouncilPlannerAPI.Models.DTOs
     // Для создания партнера
     public class PartnerCreateDto
     {
-        public string Surname { get; set; }
-        public string Name { get; set; }
+        public string Surname { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public string? Patronymic { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         public long Phone { get; set; }
-        public string Contacts { get; set; }
+        public string Contacts { get; set; } = string.Empty;
     }
 
     // Для обновления партнера
@@ -30,7 +28,7 @@ namespace StudetCouncilPlannerAPI.Models.DTOs
     public class PartnerShortDto
     {
         public Guid PartnerId { get; set; }
-        public string Fio { get; set; } // ФИО в одну строку
+        public string Fio { get; set; } = string.Empty; // ФИО в одну строку
         public string? Description { get; set; }
     }
 
@@ -38,12 +36,12 @@ namespace StudetCouncilPlannerAPI.Models.DTOs
     public class PartnerDetailDto
     {
         public Guid PartnerId { get; set; }
-        public string Surname { get; set; }
-        public string Name { get; set; }
+        public string Surname { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public string? Patronymic { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         public long Phone { get; set; }
-        public string Contacts { get; set; }
+        public string Contacts { get; set; } = string.Empty;
         public bool Archive { get; set; }
 
         public List<EventShortDto>? Events { get; set; }

@@ -1,23 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using StudetCouncilPlannerAPI.Data;
+using StudetCouncilPlannerAPI.Interfaces;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Models.Entities;
 
 namespace StudetCouncilPlannerAPI.Services
 {
-    public class TaskService
+    public class TaskService(ApplicationDbContext context) : ITaskService
     {
-        private readonly ApplicationDbContext _context;
-
-        public TaskService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
         // 1. Создание задачи
         public async Task<Guid> CreateTaskAsync(TaskCreateDto dto, Guid creatorUserId)
         {
@@ -36,15 +26,15 @@ namespace StudetCouncilPlannerAPI.Services
                     new TaskUser { UserId = dto.ExecutorUserId, Role = 1 } // 1 - исполнитель
                 }
             };
-            _context.Tasks.Add(task);
-            await _context.SaveChangesAsync();
+            context.Tasks.Add(task);
+            await context.SaveChangesAsync();
             return task.TaskId;
         }
 
         // 2. Изменение задачи (для постановщика)
         public async Task<bool> UpdateTaskAsync(Guid taskId, TaskUpdateDto dto, Guid userId)
         {
-            var task = await _context.Tasks
+            var task = await context.Tasks
                 .Include(t => t.TaskUsers)
                 .FirstOrDefaultAsync(t => t.TaskId == taskId);
             if (task == null) return false;
@@ -65,14 +55,14 @@ namespace StudetCouncilPlannerAPI.Services
                 task.TaskUsers.Remove(executor);
                 task.TaskUsers.Add(new TaskUser { UserId = dto.ExecutorUserId, Role = 1, TaskId = taskId });
             }
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // 3. Изменение статуса задачи (для исполнителя)
         public async Task<bool> UpdateTaskStatusAsync(Guid taskId, TaskStatusUpdateDto dto, Guid userId)
         {
-            var task = await _context.Tasks
+            var task = await context.Tasks
                 .Include(t => t.TaskUsers)
                 .FirstOrDefaultAsync(t => t.TaskId == taskId);
             if (task == null) return false;
@@ -84,14 +74,14 @@ namespace StudetCouncilPlannerAPI.Services
             if (dto.Status < 0 || dto.Status > 2) return false;
 
             task.Status = dto.Status;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // 4. Назначить/удалить партнера (только постановщик)
         public async Task<bool> SetPartnerAsync(Guid taskId, Guid? partnerId, Guid userId)
         {
-            var task = await _context.Tasks
+            var task = await context.Tasks
                 .Include(t => t.TaskUsers)
                 .FirstOrDefaultAsync(t => t.TaskId == taskId);
             if (task == null) return false;
@@ -100,14 +90,14 @@ namespace StudetCouncilPlannerAPI.Services
             if (!isCreator) return false;
 
             task.PartnerId = partnerId;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         // 5. Получить задачу по ID (с деталями)
         public async Task<TaskDetailDto?> GetTaskByIdAsync(Guid taskId)
         {
-            var task = await _context.Tasks
+            var task = await context.Tasks
                 .Include(t => t.TaskUsers).ThenInclude(tu => tu.User)
                 .Include(t => t.Partner)
                 .Include(t => t.Event)
@@ -139,7 +129,7 @@ namespace StudetCouncilPlannerAPI.Services
         // 6. Получить задачи пользователя с фильтрами
         public async Task<List<TaskShortDto>> GetUserTasksAsync(TaskFilterDto filter)
         {
-            var query = _context.TaskUsers
+            var query = context.TaskUsers
                 .Where(tu => (!filter.UserId.HasValue || tu.UserId == filter.UserId.Value)
                           && (!filter.UserRole.HasValue || tu.Role == filter.UserRole.Value))
                 .Select(tu => tu.Task)
@@ -172,7 +162,7 @@ namespace StudetCouncilPlannerAPI.Services
         // 7. Получить задачи мероприятия
         public async Task<List<TaskShortDto>> GetEventTasksAsync(TaskFilterDto filter)
         {
-            var query = _context.Tasks.Where(t => t.EventId == filter.EventId);
+            var query = context.Tasks.Where(t => t.EventId == filter.EventId);
 
             if (filter.Statuses != null && filter.Statuses.Any())
                 query = query.Where(t => filter.Statuses.Contains(t.Status));
@@ -196,7 +186,7 @@ namespace StudetCouncilPlannerAPI.Services
         // 8. Получить задачи партнера
         public async Task<List<TaskShortDto>> GetPartnerTasksAsync(TaskFilterDto filter)
         {
-            var query = _context.Tasks.Where(t => t.PartnerId == filter.PartnerId);
+            var query = context.Tasks.Where(t => t.PartnerId == filter.PartnerId);
 
             if (filter.Statuses != null && filter.Statuses.Any())
                 query = query.Where(t => filter.Statuses.Contains(t.Status));
