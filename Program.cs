@@ -5,8 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StudetCouncilPlannerAPI.Services;
 using Microsoft.OpenApi.Models;
-using StudetCouncilPlannerAPI.Models.Entities;
-using QuestPDF;
 using QuestPDF.Infrastructure;
 
 QuestPDF.Settings.License = LicenseType.Community;
@@ -37,9 +35,14 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            []
         }
     });
+});
+
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
 });
 
 builder.Services.AddControllers();
@@ -80,6 +83,12 @@ builder.Services.AddAuthentication(options =>
 Console.WriteLine($"JWT KEY = {jwtSettings["Key"]}");
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

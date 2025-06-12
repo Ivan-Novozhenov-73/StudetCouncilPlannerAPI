@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StudetCouncilPlannerAPI.Models.Entities;
+using Task = StudetCouncilPlannerAPI.Models.Entities.Task;
 
 namespace StudetCouncilPlannerAPI.Data
 {
@@ -12,7 +13,7 @@ namespace StudetCouncilPlannerAPI.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Event> Events { get; set; }
-        public DbSet<Models.Entities.Task> Tasks { get; set; }
+        public DbSet<Task> Tasks { get; set; }
         public DbSet<Partner> Partners { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<Note> Notes { get; set; }
@@ -25,6 +26,36 @@ namespace StudetCouncilPlannerAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Event>(e =>
+            {
+                e.Property(x => x.StartDate).HasColumnType("date");
+                e.Property(x => x.EndDate).HasColumnType("date");
+                e.Property(x => x.EventTime).HasColumnType("interval");
+            });
+
+            modelBuilder.Entity<Meeting>(e =>
+            {
+                e.Property(x => x.MeetingDate).HasColumnType("date");
+                e.Property(x => x.MeetingTime).HasColumnType("interval");
+            });
+
+            modelBuilder.Entity<Task>(e =>
+            {
+                e.Property(x => x.StartDate).HasColumnType("date");
+                e.Property(x => x.EndDate).HasColumnType("date");
+            });
+
+            // Явное указание типа для TimeSpan
+            modelBuilder.Entity<Event>(e =>
+            {
+                e.Property(x => x.EventTime).HasColumnType("interval");
+            });
+
+            modelBuilder.Entity<Meeting>(e =>
+            {
+                e.Property(x => x.MeetingTime).HasColumnType("interval");
+            });
+            
             base.OnModelCreating(modelBuilder);
 
             // User

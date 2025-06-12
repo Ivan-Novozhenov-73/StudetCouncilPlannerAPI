@@ -34,7 +34,7 @@ namespace StudetCouncilPlannerAPI.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("date");
 
                     b.Property<TimeSpan?>("EventTime")
                         .HasColumnType("interval");
@@ -47,7 +47,7 @@ namespace StudetCouncilPlannerAPI.Migrations
                         .HasColumnType("smallint");
 
                     b.Property<DateOnly?>("StartDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("date");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
@@ -111,7 +111,7 @@ namespace StudetCouncilPlannerAPI.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateOnly>("MeetingDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("date");
 
                     b.Property<TimeSpan>("MeetingTime")
                         .HasColumnType("interval");
@@ -223,7 +223,7 @@ namespace StudetCouncilPlannerAPI.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateOnly>("EndDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("date");
 
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
@@ -232,7 +232,7 @@ namespace StudetCouncilPlannerAPI.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateOnly>("StartDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("date");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
