@@ -118,7 +118,7 @@ namespace StudetCouncilPlannerAPI.Services
                 NumberOfParticipants = dto.NumberOfParticipants,
                 EventUsers = new List<EventUser>
                 {
-                    new EventUser
+                    new()
                     {
                         UserId = creatorUserId,
                         Role = 2 // 2 — главный организатор

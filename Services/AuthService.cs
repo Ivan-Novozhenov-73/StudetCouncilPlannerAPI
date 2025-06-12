@@ -15,7 +15,9 @@ namespace StudetCouncilPlannerAPI.Services
         public async Task<UserDto> RegisterAsync(UserRegisterDto dto)
         {
             if (await context.Users.AnyAsync(x => x.Login == dto.Login))
-                throw new Exception("Пользователь с таким логином уже существует.");
+            {
+                return null!;
+            }
 
             var user = new User
             {
@@ -41,13 +43,13 @@ namespace StudetCouncilPlannerAPI.Services
         {
             var user = await context.Users.FirstOrDefaultAsync(x => x.Login == dto.Login);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                throw new Exception("Неверный логин или пароль.");
-
-            var token = GenerateJwtToken(user);
+            {
+                return null!;
+            }
 
             return new UserLoginResponseDto
             {
-                Token = token,
+                Token = GenerateJwtToken(user),
                 User = MapToDto(user)
             };
         }
@@ -55,7 +57,7 @@ namespace StudetCouncilPlannerAPI.Services
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = configuration.GetSection("Jwt");
-            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? string.Empty);
 
             var claims = new List<Claim>
             {
@@ -64,19 +66,20 @@ namespace StudetCouncilPlannerAPI.Services
                 new(ClaimTypes.Role, user.Role.ToString())
             };
 
-            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(12),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtSecurityTokenHandler().WriteToken(
+                new JwtSecurityToken(
+                    issuer: jwtSettings["Issuer"],
+                    audience: jwtSettings["Audience"],
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddHours(12),
+                    signingCredentials: new SigningCredentials(
+                        new SymmetricSecurityKey(key),
+                        SecurityAlgorithms.HmacSha256)
+                    )
+                );
         }
 
-        private UserDto MapToDto(User user)
+        private static UserDto MapToDto(User user)
         {
             return new UserDto
             {

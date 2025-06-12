@@ -11,8 +11,7 @@ namespace StudetCouncilPlannerAPI.Services
         // Создание встречи (только глава или председатель студсовета)
         public async Task<Guid?> CreateMeetingAsync(MeetingCreateDto dto, Guid creatorId)
         {
-            if (!await IsUserCouncilHeadOrChairAsync(creatorId))
-                return null;
+            if (!await IsUserCouncilHeadOrChairAsync(creatorId)) return null;
 
             var meeting = new Meeting
             {
@@ -42,8 +41,7 @@ namespace StudetCouncilPlannerAPI.Services
         public async Task<bool> AddParticipantAsync(Guid meetingId, Guid organizerId, MeetingAddParticipantDto dto)
         {
             // Проверяем, что organizerId действительно организатор этой встречи
-            if (!await IsOrganizerAsync(meetingId, organizerId))
-                return false;
+            if (!await IsOrganizerAsync(meetingId, organizerId)) return false;
 
             // Нельзя добавить организатора или дублировать участника
             if (await context.MeetingUsers.AnyAsync(mu => mu.MeetingId == meetingId && mu.UserId == dto.UserId))
@@ -56,26 +54,26 @@ namespace StudetCouncilPlannerAPI.Services
                 UserId = dto.UserId,
                 Role = 0
             };
+
             context.MeetingUsers.Add(meetingUser);
             await context.SaveChangesAsync();
             return true;
         }
 
         // Удаление участника (только организатор, нельзя удалить себя)
-        public async Task<bool> RemoveParticipantAsync(Guid meetingId, Guid organizerId, MeetingRemoveParticipantDto dto)
+        public async Task<bool> RemoveParticipantAsync(Guid meetingId, Guid organizerId,
+            MeetingRemoveParticipantDto dto)
         {
             // Проверяем, что organizerId действительно организатор этой встречи
-            if (!await IsOrganizerAsync(meetingId, organizerId))
-                return false;
+            if (!await IsOrganizerAsync(meetingId, organizerId)) return false;
 
             // Нельзя удалить самого организатора
-            if (dto.UserId == organizerId)
-                return false;
+            if (dto.UserId == organizerId) return false;
 
             var meetingUser = await context.MeetingUsers
                 .FirstOrDefaultAsync(mu => mu.MeetingId == meetingId && mu.UserId == dto.UserId && mu.Role == 0);
-            if (meetingUser == null)
-                return false;
+
+            if (meetingUser == null) return false;
 
             context.MeetingUsers.Remove(meetingUser);
             await context.SaveChangesAsync();
@@ -85,59 +83,58 @@ namespace StudetCouncilPlannerAPI.Services
         // Получение всех встреч пользователя (организатор или участник)
         public async Task<List<MeetingShortDto>> GetUserMeetingsAsync(Guid userId)
         {
-            var meetings = await context.MeetingUsers
-                .Where(mu => mu.UserId == userId)
-                .Include(mu => mu.Meeting)
-                .ThenInclude(m => m.MeetingUsers)
-                .ThenInclude(mu => mu.User)
-                .ToListAsync();
-
-            var result = new List<MeetingShortDto>();
-            foreach (var mu in meetings)
-            {
-                var meeting = mu.Meeting;
-                var organizerMU = meeting.MeetingUsers.FirstOrDefault(x => x.Role == 1);
-                var organizerUser = organizerMU?.User;
-                result.Add(new MeetingShortDto
+            return (await context.MeetingUsers
+                    .Where(mu => mu.UserId == userId)
+                    .Include(mu => mu.Meeting)
+                    .ThenInclude(m => m.MeetingUsers)
+                    .ThenInclude(mu => mu.User)
+                    .ToListAsync())
+                .Select(mu =>
                 {
-                    MeetingId = meeting.MeetingId,
-                    Title = meeting.Title,
-                    MeetingDate = meeting.MeetingDate,
-                    MeetingTime = meeting.MeetingTime,
-                    Location = meeting.Location,
-                    Link = meeting.Link,
-                    OrganizerFullName = organizerUser != null
-                        ? $"{organizerUser.Surname} {organizerUser.Name}"
-                        : ""
-                });
-            }
+                    var organizerMU = mu.Meeting.MeetingUsers.FirstOrDefault(x => x.Role == 1);
+                    var organizerUser = organizerMU?.User;
 
-            // Убираем дубли если пользователь вдруг был участником и организатором (теоретически не должно быть)
-            return result.GroupBy(x => x.MeetingId).Select(g => g.First()).OrderBy(x => x.MeetingDate).ThenBy(x => x.MeetingTime).ToList();
+                    return new MeetingShortDto
+                    {
+                        MeetingId = mu.Meeting.MeetingId,
+                        Title = mu.Meeting.Title,
+                        MeetingDate = mu.Meeting.MeetingDate,
+                        MeetingTime = mu.Meeting.MeetingTime,
+                        Location = mu.Meeting.Location,
+                        Link = mu.Meeting.Link,
+                        OrganizerFullName = organizerUser != null
+                            ? $"{organizerUser.Surname} {organizerUser.Name}"
+                            : ""
+                    };
+                })
+                .GroupBy(x => x.MeetingId)
+                .Select(g => g.First())
+                .OrderBy(x => x.MeetingDate)
+                .ThenBy(x => x.MeetingTime).ToList();
         }
 
         // Получение подробной информации о встрече (только для участников и организатора)
         public async Task<MeetingDetailDto?> GetMeetingByIdAsync(Guid meetingId, Guid userId)
         {
             // Проверка доступа
-            if (!await IsParticipantOrOrganizerAsync(meetingId, userId))
-                return null;
+            if (!await IsParticipantOrOrganizerAsync(meetingId, userId)) return null;
 
             var meeting = await context.Meetings
                 .Include(m => m.MeetingUsers)
-                    .ThenInclude(mu => mu.User)
+                .ThenInclude(mu => mu.User)
                 .FirstOrDefaultAsync(m => m.MeetingId == meetingId);
 
-            if (meeting == null)
-                return null;
+            if (meeting == null) return null;
 
             var organizerMU = meeting.MeetingUsers.FirstOrDefault(mu => mu.Role == 1);
-            var organizer = organizerMU != null ? new MeetingParticipantDto
-            {
-                UserId = organizerMU.UserId,
-                FullName = $"{organizerMU.User.Surname} {organizerMU.User.Name}",
-                Role = 1
-            } : null;
+            var organizer = organizerMU != null
+                ? new MeetingParticipantDto
+                {
+                    UserId = organizerMU.UserId,
+                    FullName = $"{organizerMU.User.Surname} {organizerMU.User.Name}",
+                    Role = 1
+                }
+                : null;
 
             var participants = meeting.MeetingUsers
                 .Where(mu => mu.Role == 0)
@@ -161,7 +158,7 @@ namespace StudetCouncilPlannerAPI.Services
                 Participants = participants
             };
         }
-        
+
         // Проверка глобальной роли пользователя (1 — глава, 2 — председатель)
         private async Task<bool> IsUserCouncilHeadOrChairAsync(Guid userId)
         {
@@ -176,7 +173,7 @@ namespace StudetCouncilPlannerAPI.Services
                 .Include(mu => mu.User)
                 .FirstOrDefaultAsync(mu => mu.MeetingId == meetingId && mu.Role == 1);
         }
-        
+
         // Проверка, является ли пользователь организатором данной встречи
         private async Task<bool> IsOrganizerAsync(Guid meetingId, Guid userId)
         {

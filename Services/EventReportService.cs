@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.Serialization;
 using Microsoft.EntityFrameworkCore;
 using StudetCouncilPlannerAPI.Data;
 using StudetCouncilPlannerAPI.Models.DTOs;
@@ -6,6 +7,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using StudetCouncilPlannerAPI.Interfaces;
+using StudetCouncilPlannerAPI.Models.Enums;
 
 namespace StudetCouncilPlannerAPI.Services
 {
@@ -17,16 +19,13 @@ namespace StudetCouncilPlannerAPI.Services
         public async Task<byte[]> GeneratePlanNextMonthAsync()
         {
             var today = DateTime.Today;
-            var nextMonthDate = today.AddMonths(1);
-            int nextMonth = nextMonthDate.Month;
-            int year = nextMonthDate.Year;
-
+            var (year, nextMonth, _) = today.AddMonths(1);
             var firstDay = new DateOnly(year, nextMonth, 1);
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
 
             var events = await context.Events
                 .Include(e => e.EventUsers)
-                    .ThenInclude(eu => eu.User)
+                .ThenInclude(eu => eu.User)
                 .Where(e => e.EndDate >= firstDay && e.EndDate <= lastDay)
                 .OrderBy(e => e.EndDate)
                 .ToListAsync();
@@ -41,14 +40,14 @@ namespace StudetCouncilPlannerAPI.Services
                     EventTime = e.EventTime,
                     Location = string.IsNullOrWhiteSpace(e.Location) ? "По согласованию" : e.Location,
                     ShortDescription = e.Description,
-                    ResponsibleFullName = mainOrg != null ? $"{mainOrg.User.Surname} {GetInitials(mainOrg.User.Name, mainOrg.User.Patronymic)}" : "—",
+                    ResponsibleFullName = mainOrg != null
+                        ? $"{mainOrg.User.Surname} {GetInitials(mainOrg.User.Name, mainOrg.User.Patronymic ?? string.Empty)}"
+                        : "—",
                     ResponsiblePhone = mainOrg != null ? mainOrg.User.Phone.ToString() : "—"
                 };
             }).ToList();
 
-            string monthRu = CultureInfo.GetCultureInfo("ru-RU").DateTimeFormat.GetMonthName(nextMonth).ToLower();
-
-            return GeneratePlanPdf(reportRows, monthRu, year);
+            return GeneratePlanPdf(reportRows, MonthRu(nextMonth), year);
         }
 
         /// <summary>
@@ -58,12 +57,11 @@ namespace StudetCouncilPlannerAPI.Services
         {
             var firstDay = new DateOnly(year, month, 1);
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
-            const short CompletedStatus = 4;
 
             var events = await context.Events
                 .Include(e => e.EventUsers)
-                    .ThenInclude(eu => eu.User)
-                .Where(e => e.EndDate >= firstDay && e.EndDate <= lastDay && e.Status == CompletedStatus)
+                .ThenInclude(eu => eu.User)
+                .Where(e => e.EndDate >= firstDay && e.EndDate <= lastDay && e.Status == (int)EventStatus.Completed)
                 .OrderBy(e => e.EndDate)
                 .ToListAsync();
 
@@ -72,7 +70,7 @@ namespace StudetCouncilPlannerAPI.Services
                 var mainOrg = e.EventUsers.FirstOrDefault(u => u.Role == 2);
                 var organizerTeam = e.EventUsers
                     .Where(u => u.Role == 1)
-                    .Select(u => $"{u.User.Surname} {GetInitials(u.User.Name, u.User.Patronymic)}")
+                    .Select(u => $"{u.User.Surname} {GetInitials(u.User.Name, u.User.Patronymic ?? string.Empty)}")
                     .ToList();
                 var participantsCount = e.EventUsers.Count(u => u.Role == 0);
                 var organizersCount = e.EventUsers.Count(u => u.Role == 1 || u.Role == 2);
@@ -86,15 +84,15 @@ namespace StudetCouncilPlannerAPI.Services
                     OrganizersCount = organizersCount,
                     ActiveParticipantsCount = participantsCount,
                     NumberOfSpectators = e.NumberOfParticipants,
-                    ResponsibleFullName = mainOrg != null ? $"{mainOrg.User.Surname} {GetInitials(mainOrg.User.Name, mainOrg.User.Patronymic)}" : "—",
+                    ResponsibleFullName = mainOrg != null
+                        ? $"{mainOrg.User.Surname} {GetInitials(mainOrg.User.Name, mainOrg.User.Patronymic ?? string.Empty)}"
+                        : "—",
                     ResponsiblePhone = mainOrg != null ? mainOrg.User.Phone.ToString() : "—",
                     OrganizerTeamFullNames = organizerTeam
                 };
             }).ToList();
 
-            string monthRu = CultureInfo.GetCultureInfo("ru-RU").DateTimeFormat.GetMonthName(month).ToLower();
-
-            return GenerateCompletedReportPdf(reportRows, monthRu, year);
+            return GenerateCompletedReportPdf(reportRows, MonthRu(month), year);
         }
 
         /// <summary>
@@ -104,33 +102,34 @@ namespace StudetCouncilPlannerAPI.Services
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
-                throw new Exception("Пользователь не найден");
+            {
+                return [];
+            }
 
-            const short CompletedStatus = 4;
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             var userEventRoles = await context.EventUsers
                 .Include(eu => eu.Event)
-                .Where(eu => eu.UserId == userId && eu.Event.Status == CompletedStatus && eu.Event.EndDate <= today)
+                .Where(eu => eu.UserId == userId && eu.Event.Status == (int)EventStatus.Completed && eu.Event.EndDate <= today)
                 .ToListAsync();
 
             var reportRows = userEventRoles.Select(eu => new UserEventsReportRowDto
-            {
-                Title = eu.Event.Title,
-                UserRole = eu.Role,
-                EventDate = eu.Event.EndDate,
-                EventTime = eu.Event.EventTime,
-                Location = string.IsNullOrWhiteSpace(eu.Event.Location) ? "По согласованию" : eu.Event.Location
-            })
-            .OrderBy(r => r.EventDate)
-            .ToList();
+                {
+                    Title = eu.Event.Title,
+                    UserRole = eu.Role,
+                    EventDate = eu.Event.EndDate,
+                    EventTime = eu.Event.EventTime,
+                    Location = string.IsNullOrWhiteSpace(eu.Event.Location) ? "По согласованию" : eu.Event.Location
+                })
+                .OrderBy(r => r.EventDate)
+                .ToList();
 
             var userInfo = new UserInfoForReportDto
             {
                 Group = user.Group,
                 Surname = user.Surname,
                 Name = user.Name,
-                Patronymic = user.Patronymic
+                Patronymic = user.Patronymic ?? string.Empty,
             };
 
             return GenerateUserEventsReportPdf(reportRows, userInfo);
@@ -172,7 +171,7 @@ namespace StudetCouncilPlannerAPI.Services
         /// <summary>
         /// Генерация PDF плана мероприятий (единый стиль)
         /// </summary>
-        private byte[] GeneratePlanPdf(List<EventPlanReportRowDto> rows, string monthText, int year)
+        private static byte[] GeneratePlanPdf(List<EventPlanReportRowDto> rows, string monthText, int year)
         {
             var file = Document.Create(container =>
             {
@@ -200,39 +199,41 @@ namespace StudetCouncilPlannerAPI.Services
                     page.Content().Element(content =>
                     {
                         content
-                        .DefaultTextStyle(s => s.FontSize(9))
-                        .Table(table =>
-                        {
-                            table.ColumnsDefinition(columns =>
+                            .DefaultTextStyle(s => s.FontSize(9))
+                            .Table(table =>
                             {
-                                columns.RelativeColumn(1.5f); // Название
-                                columns.RelativeColumn(1f);   // Дата
-                                columns.RelativeColumn(1f);   // Время
-                                columns.RelativeColumn(1.2f); // Место
-                                columns.RelativeColumn(2f);   // Краткое описание
-                                columns.RelativeColumn(1.5f); // Ответственный
-                            });
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(1.5f); // Название
+                                    columns.RelativeColumn(); // Дата
+                                    columns.RelativeColumn(); // Время
+                                    columns.RelativeColumn(1.2f); // Место
+                                    columns.RelativeColumn(2f); // Краткое описание
+                                    columns.RelativeColumn(1.5f); // Ответственный
+                                });
 
-                            table.Header(header =>
-                            {
-                                header.Cell().Element(CellHeaderStyle).Text("Название мероприятия");
-                                header.Cell().Element(CellHeaderStyle).Text("Дата проведения");
-                                header.Cell().Element(CellHeaderStyle).Text("Время проведения");
-                                header.Cell().Element(CellHeaderStyle).Text("Место проведения");
-                                header.Cell().Element(CellHeaderStyle).Text("Краткое описание");
-                                header.Cell().Element(CellHeaderStyle).Text("Ответственный (Ф.И.О., телефон)");
-                            });
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellHeaderStyle).Text("Название мероприятия");
+                                    header.Cell().Element(CellHeaderStyle).Text("Дата проведения");
+                                    header.Cell().Element(CellHeaderStyle).Text("Время проведения");
+                                    header.Cell().Element(CellHeaderStyle).Text("Место проведения");
+                                    header.Cell().Element(CellHeaderStyle).Text("Краткое описание");
+                                    header.Cell().Element(CellHeaderStyle).Text("Ответственный (Ф.И.О., телефон)");
+                                });
 
-                            foreach (var row in rows)
-                            {
-                                table.Cell().Element(CellStyle).Text(row.Title).WrapAnywhere();
-                                table.Cell().Element(CellStyle).Text(DateToString(row.EventDate));
-                                table.Cell().Element(CellStyle).Text(TimeToString(row.EventTime));
-                                table.Cell().Element(CellStyle).Text(row.Location ?? "По согласованию").WrapAnywhere();
-                                table.Cell().Element(CellStyle).Text(row.ShortDescription).WrapAnywhere();
-                                table.Cell().Element(CellStyle).Text($"{row.ResponsibleFullName}\n{row.ResponsiblePhone}").WrapAnywhere();
-                            }
-                        });
+                                foreach (var row in rows)
+                                {
+                                    table.Cell().Element(CellStyle).Text(row.Title).WrapAnywhere();
+                                    table.Cell().Element(CellStyle).Text(DateToString(row.EventDate));
+                                    table.Cell().Element(CellStyle).Text(TimeToString(row.EventTime));
+                                    table.Cell().Element(CellStyle).Text(row.Location ?? "По согласованию")
+                                        .WrapAnywhere();
+                                    table.Cell().Element(CellStyle).Text(row.ShortDescription).WrapAnywhere();
+                                    table.Cell().Element(CellStyle)
+                                        .Text($"{row.ResponsibleFullName}\n{row.ResponsiblePhone}").WrapAnywhere();
+                                }
+                            });
                     });
                 });
             }).GeneratePdf();
@@ -243,7 +244,7 @@ namespace StudetCouncilPlannerAPI.Services
         /// <summary>
         /// Генерация PDF отчета о проведенных мероприятиях (единый стиль)
         /// </summary>
-        private byte[] GenerateCompletedReportPdf(List<EventCompletedReportRowDto> rows, string monthText, int year)
+        private static byte[] GenerateCompletedReportPdf(List<EventCompletedReportRowDto> rows, string monthText, int year)
         {
             var file = Document.Create(container =>
             {
@@ -258,7 +259,8 @@ namespace StudetCouncilPlannerAPI.Services
                             column.Spacing(3);
                             column.Item().AlignCenter().Text("ОТЧЕТ")
                                 .FontSize(22).Bold();
-                            column.Item().AlignCenter().Text("о проведенных мероприятиях совета студенческого самоуправления")
+                            column.Item().AlignCenter()
+                                .Text("о проведенных мероприятиях совета студенческого самоуправления")
                                 .FontSize(14).SemiBold();
                             column.Item().AlignCenter().Text($"за {monthText} {year} г.")
                                 .FontSize(13).SemiBold();
@@ -269,48 +271,50 @@ namespace StudetCouncilPlannerAPI.Services
                     page.Content().Element(content =>
                     {
                         content
-                        .DefaultTextStyle(s => s.FontSize(9))
-                        .Table(table =>
-                        {
-                            table.ColumnsDefinition(columns =>
+                            .DefaultTextStyle(s => s.FontSize(9))
+                            .Table(table =>
                             {
-                                columns.RelativeColumn(1.5f); // Название
-                                columns.RelativeColumn(1f);   // Дата
-                                columns.RelativeColumn(1f);   // Время
-                                columns.RelativeColumn(1.2f); // Место
-                                columns.RelativeColumn(0.7f); // орг.
-                                columns.RelativeColumn(0.9f); // участников
-                                columns.RelativeColumn(0.9f); // зрителей
-                                columns.RelativeColumn(1.5f); // ответственный
-                                columns.RelativeColumn(2f);   // команда
-                            });
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(1.5f); // Название
+                                    columns.RelativeColumn(1f); // Дата
+                                    columns.RelativeColumn(1f); // Время
+                                    columns.RelativeColumn(1.2f); // Место
+                                    columns.RelativeColumn(0.7f); // орг.
+                                    columns.RelativeColumn(0.9f); // участников
+                                    columns.RelativeColumn(0.9f); // зрителей
+                                    columns.RelativeColumn(1.5f); // ответственный
+                                    columns.RelativeColumn(2f); // команда
+                                });
 
-                            table.Header(header =>
-                            {
-                                header.Cell().Element(CellHeaderStyle).Text("Название nмероприятия");
-                                header.Cell().Element(CellHeaderStyle).Text("Дата");
-                                header.Cell().Element(CellHeaderStyle).Text("Время");
-                                header.Cell().Element(CellHeaderStyle).Text("Место");
-                                header.Cell().Element(CellHeaderStyle).Text("Орг.");
-                                header.Cell().Element(CellHeaderStyle).Text("Участн.");
-                                header.Cell().Element(CellHeaderStyle).Text("Зрители");
-                                header.Cell().Element(CellHeaderStyle).Text("Ответственный\n");
-                                header.Cell().Element(CellHeaderStyle).Text("Команда организаторов");
-                            });
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellHeaderStyle).Text("Название nмероприятия");
+                                    header.Cell().Element(CellHeaderStyle).Text("Дата");
+                                    header.Cell().Element(CellHeaderStyle).Text("Время");
+                                    header.Cell().Element(CellHeaderStyle).Text("Место");
+                                    header.Cell().Element(CellHeaderStyle).Text("Орг.");
+                                    header.Cell().Element(CellHeaderStyle).Text("Участн.");
+                                    header.Cell().Element(CellHeaderStyle).Text("Зрители");
+                                    header.Cell().Element(CellHeaderStyle).Text("Ответственный\n");
+                                    header.Cell().Element(CellHeaderStyle).Text("Команда организаторов");
+                                });
 
-                            foreach (var row in rows)
-                            {
-                                table.Cell().Element(CellStyle).Text(row.Title).WrapAnywhere();
-                                table.Cell().Element(CellStyle).Text(DateToString(row.EventDate));
-                                table.Cell().Element(CellStyle).Text(TimeToString(row.EventTime));
-                                table.Cell().Element(CellStyle).Text(row.Location ?? "—").WrapAnywhere();
-                                table.Cell().Element(CellStyle).Text(row.OrganizersCount.ToString());
-                                table.Cell().Element(CellStyle).Text(row.ActiveParticipantsCount.ToString());
-                                table.Cell().Element(CellStyle).Text(row.NumberOfSpectators?.ToString() ?? "—");
-                                table.Cell().Element(CellStyle).Text($"{row.ResponsibleFullName}\n{row.ResponsiblePhone}").WrapAnywhere();
-                                table.Cell().Element(CellStyle).Text(string.Join(",\n", row.OrganizerTeamFullNames)).WrapAnywhere();
-                            }
-                        });
+                                foreach (var row in rows)
+                                {
+                                    table.Cell().Element(CellStyle).Text(row.Title).WrapAnywhere();
+                                    table.Cell().Element(CellStyle).Text(DateToString(row.EventDate));
+                                    table.Cell().Element(CellStyle).Text(TimeToString(row.EventTime));
+                                    table.Cell().Element(CellStyle).Text(row.Location ?? "—").WrapAnywhere();
+                                    table.Cell().Element(CellStyle).Text(row.OrganizersCount.ToString());
+                                    table.Cell().Element(CellStyle).Text(row.ActiveParticipantsCount.ToString());
+                                    table.Cell().Element(CellStyle).Text(row.NumberOfSpectators?.ToString() ?? "—");
+                                    table.Cell().Element(CellStyle)
+                                        .Text($"{row.ResponsibleFullName}\n{row.ResponsiblePhone}").WrapAnywhere();
+                                    table.Cell().Element(CellStyle).Text(string.Join(",\n", row.OrganizerTeamFullNames))
+                                        .WrapAnywhere();
+                                }
+                            });
                     });
                 });
             }).GeneratePdf();
@@ -321,7 +325,7 @@ namespace StudetCouncilPlannerAPI.Services
         /// <summary>
         /// Генерация PDF отчета о завершенных мероприятиях пользователя (единый стиль)
         /// </summary>
-        private byte[] GenerateUserEventsReportPdf(List<UserEventsReportRowDto> rows, UserInfoForReportDto user)
+        private static byte[] GenerateUserEventsReportPdf(List<UserEventsReportRowDto> rows, UserInfoForReportDto user)
         {
             var file = Document.Create(container =>
             {
@@ -349,36 +353,37 @@ namespace StudetCouncilPlannerAPI.Services
                     page.Content().Element(content =>
                     {
                         content
-                        .DefaultTextStyle(s => s.FontSize(9))
-                        .Table(table =>
-                        {
-                            table.ColumnsDefinition(columns =>
+                            .DefaultTextStyle(s => s.FontSize(9))
+                            .Table(table =>
                             {
-                                columns.RelativeColumn(1.5f); // Название
-                                columns.RelativeColumn(1.2f);   // Роль
-                                columns.RelativeColumn(1f);   // Дата
-                                columns.RelativeColumn(1f);   // Время
-                                columns.RelativeColumn(1.2f); // Место
-                            });
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(1.5f); // Название
+                                    columns.RelativeColumn(1.2f); // Роль
+                                    columns.RelativeColumn(1f); // Дата
+                                    columns.RelativeColumn(1f); // Время
+                                    columns.RelativeColumn(1.2f); // Место
+                                });
 
-                            table.Header(header =>
-                            {
-                                header.Cell().Element(CellHeaderStyle).Text("Название мероприятия");
-                                header.Cell().Element(CellHeaderStyle).Text("Роль");
-                                header.Cell().Element(CellHeaderStyle).Text("Дата проведения");
-                                header.Cell().Element(CellHeaderStyle).Text("Время проведения");
-                                header.Cell().Element(CellHeaderStyle).Text("Место проведения");
-                            });
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellHeaderStyle).Text("Название мероприятия");
+                                    header.Cell().Element(CellHeaderStyle).Text("Роль");
+                                    header.Cell().Element(CellHeaderStyle).Text("Дата проведения");
+                                    header.Cell().Element(CellHeaderStyle).Text("Время проведения");
+                                    header.Cell().Element(CellHeaderStyle).Text("Место проведения");
+                                });
 
-                            foreach (var row in rows)
-                            {
-                                table.Cell().Element(CellStyle).Text(row.Title).WrapAnywhere();
-                                table.Cell().Element(CellStyle).Text(GetRoleName(row.UserRole));
-                                table.Cell().Element(CellStyle).Text(DateToString(row.EventDate));
-                                table.Cell().Element(CellStyle).Text(TimeToString(row.EventTime));
-                                table.Cell().Element(CellStyle).Text(row.Location ?? "По согласованию").WrapAnywhere();
-                            }
-                        });
+                                foreach (var row in rows)
+                                {
+                                    table.Cell().Element(CellStyle).Text(row.Title).WrapAnywhere();
+                                    table.Cell().Element(CellStyle).Text(GetRoleName(row.UserRole));
+                                    table.Cell().Element(CellStyle).Text(DateToString(row.EventDate));
+                                    table.Cell().Element(CellStyle).Text(TimeToString(row.EventTime));
+                                    table.Cell().Element(CellStyle).Text(row.Location ?? "По согласованию")
+                                        .WrapAnywhere();
+                                }
+                            });
                     });
                 });
             }).GeneratePdf();
@@ -394,10 +399,9 @@ namespace StudetCouncilPlannerAPI.Services
                     _ => $"роль {role}"
                 };
         }
-        
+
         private static string DateToString(DateOnly? date) => date?.ToString("dd.MM.yyyy") ?? "—";
         private static string TimeToString(TimeSpan? time) => time.HasValue ? time.Value.ToString(@"hh\:mm") : "—";
-
-
+        private static string MonthRu(int month) => CultureInfo.GetCultureInfo("ru-RU").DateTimeFormat.GetMonthName(month).ToLower();
     }
 }

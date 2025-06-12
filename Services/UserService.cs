@@ -135,7 +135,7 @@ namespace StudetCouncilPlannerAPI.Services
         }
 
         // Маппинг User -> UserDto
-        private static UserDto ToUserDto(User u) => new UserDto
+        private static UserDto ToUserDto(User u) => new()
         {
             UserId = u.UserId,
             Login = u.Login,
