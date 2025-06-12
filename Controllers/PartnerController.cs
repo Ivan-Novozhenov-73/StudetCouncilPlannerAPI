@@ -3,59 +3,44 @@ using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.Dtos;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PartnerController : ControllerBase
+    [ApiController, Route("api/[controller]")]
+    public class PartnerController(PartnerService partnerService) : ControllerBase
     {
-        private readonly PartnerService _partnerService;
-
-        public PartnerController(PartnerService partnerService)
-        {
-            _partnerService = partnerService;
-        }
-
         // 1. Создать партнера (роль 1 или 2)
-        [HttpPost]
-        [Authorize(Roles = "1,2")]
+        [HttpPost, Authorize(Roles = "1,2")]
         public async Task<ActionResult<Guid>> Create([FromBody] PartnerCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var id = await _partnerService.CreatePartnerAsync(dto);
+            var id = await partnerService.CreatePartnerAsync(dto);
             return CreatedAtAction(nameof(GetById), new { partnerId = id }, id);
         }
 
         // 2. Изменить партнера (роль 1 или 2)
-        [HttpPut("{partnerId}")]
-        [Authorize(Roles = "1,2")]
+        [HttpPut("{partnerId}"), Authorize(Roles = "1,2")]
         public async Task<ActionResult> Update(Guid partnerId, [FromBody] PartnerUpdateDto dto)
         {
-            var result = await _partnerService.UpdatePartnerAsync(partnerId, dto);
+            var result = await partnerService.UpdatePartnerAsync(partnerId, dto);
             if (!result) return NotFound();
             return NoContent();
         }
 
         // 3. Архивировать партнера (роль 1 или 2)
-        [HttpPatch("{partnerId}/archive")]
-        [Authorize(Roles = "1,2")]
+        [HttpPatch("{partnerId}/archive"), Authorize(Roles = "1,2")]
         public async Task<ActionResult> Archive(Guid partnerId)
         {
-            var result = await _partnerService.ArchivePartnerAsync(partnerId);
+            var result = await partnerService.ArchivePartnerAsync(partnerId);
             if (!result) return NotFound();
             return NoContent();
         }
 
         // 4. Восстановить партнера из архива (роль 1 или 2)
-        [HttpPatch("{partnerId}/restore")]
-        [Authorize(Roles = "1,2")]
+        [HttpPatch("{partnerId}/restore"), Authorize(Roles = "1,2")]
         public async Task<ActionResult> Restore(Guid partnerId)
         {
-            var result = await _partnerService.RestorePartnerAsync(partnerId);
+            var result = await partnerService.RestorePartnerAsync(partnerId);
             if (!result) return NotFound();
             return NoContent();
         }
@@ -72,7 +57,7 @@ namespace StudetCouncilPlannerAPI.Controllers
                 Page = page,
                 PageSize = pageSize
             };
-            var result = await _partnerService.SearchPartnersAsync(filter);
+            var result = await partnerService.SearchPartnersAsync(filter);
             return Ok(result);
         }
 
@@ -80,7 +65,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         [HttpGet("{partnerId}")]
         public async Task<ActionResult<PartnerDetailDto>> GetById(Guid partnerId)
         {
-            var result = await _partnerService.GetPartnerByIdAsync(partnerId);
+            var result = await partnerService.GetPartnerByIdAsync(partnerId);
             if (result == null) return NotFound();
             return Ok(result);
         }
@@ -89,7 +74,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         [HttpGet("{partnerId}/tasks")]
         public async Task<ActionResult<List<TaskShortDto>>> GetPartnerTasks(Guid partnerId)
         {
-            var result = await _partnerService.GetTasksByPartnerAsync(partnerId);
+            var result = await partnerService.GetTasksByPartnerAsync(partnerId);
             return Ok(result);
         }
 
@@ -97,7 +82,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         [HttpGet("{partnerId}/events")]
         public async Task<ActionResult<List<EventShortDto>>> GetPartnerEvents(Guid partnerId)
         {
-            var result = await _partnerService.GetEventsByPartnerAsync(partnerId);
+            var result = await partnerService.GetEventsByPartnerAsync(partnerId);
             return Ok(result);
         }
     }

@@ -2,34 +2,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Services;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using StudetCouncilPlannerAPI.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class TaskController : ControllerBase
+    [ApiController, Route("api/[controller]"), Authorize]
+    public class TaskController(TaskService taskService, ApplicationDbContext context) : ControllerBase
     {
-        private readonly TaskService _taskService;
-        private readonly ApplicationDbContext _context;
-
-        public TaskController(TaskService taskService, ApplicationDbContext context)
-        {
-            _taskService = taskService;
-            _context = context;
-        }
-
         // Получить задачу по ID
         [HttpGet("{taskId}")]
         public async Task<ActionResult<TaskDetailDto>> GetById(Guid taskId)
         {
-            var result = await _taskService.GetTaskByIdAsync(taskId);
+            var result = await taskService.GetTaskByIdAsync(taskId);
             if (result == null) return NotFound();
             return Ok(result);
         }
@@ -39,22 +25,22 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<ActionResult<Guid>> Create([FromBody] TaskCreateDto dto)
         {
             var currentUserId = GetCurrentUserId();
-            var user = await _context.Users.FindAsync(currentUserId);
+            var user = await context.Users.FindAsync(currentUserId);
             Console.WriteLine($"[TaskController.Create] user: {user}, user.Role: {user?.Role}");
             if (user == null || (user.Role != 1 && user.Role != 2))
                 return Forbid();
 
-            bool isMainOrganizer = await _context.EventUsers
+            bool isMainOrganizer = await context.EventUsers
                 .AnyAsync(eu => eu.EventId == dto.EventId && eu.UserId == currentUserId && eu.Role == 2);
             if (!isMainOrganizer)
                 return Forbid();
 
-            bool executorIsAllowed = await _context.EventUsers
+            bool executorIsAllowed = await context.EventUsers
                 .AnyAsync(eu => eu.EventId == dto.EventId && eu.UserId == dto.ExecutorUserId && (eu.Role == 1 || eu.Role == 2));
             if (!executorIsAllowed)
                 return BadRequest("Executor must be organizer or main organizer of event.");
 
-            var taskId = await _taskService.CreateTaskAsync(dto, currentUserId);
+            var taskId = await taskService.CreateTaskAsync(dto, currentUserId);
             return CreatedAtAction(nameof(GetById), new { taskId }, taskId);
         }
 
@@ -63,7 +49,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<ActionResult> Update(Guid taskId, [FromBody] TaskUpdateDto dto)
         {
             var currentUserId = GetCurrentUserId();
-            var result = await _taskService.UpdateTaskAsync(taskId, dto, currentUserId);
+            var result = await taskService.UpdateTaskAsync(taskId, dto, currentUserId);
             if (!result) return Forbid();
             return NoContent();
         }
@@ -73,7 +59,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<ActionResult> UpdateStatus(Guid taskId, [FromBody] TaskStatusUpdateDto dto)
         {
             var currentUserId = GetCurrentUserId();
-            var result = await _taskService.UpdateTaskStatusAsync(taskId, dto, currentUserId);
+            var result = await taskService.UpdateTaskStatusAsync(taskId, dto, currentUserId);
             if (!result) return Forbid();
             return NoContent();
         }
@@ -83,7 +69,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<ActionResult> SetPartner(Guid taskId, [FromQuery] Guid? partnerId)
         {
             var currentUserId = GetCurrentUserId();
-            var result = await _taskService.SetPartnerAsync(taskId, partnerId, currentUserId);
+            var result = await taskService.SetPartnerAsync(taskId, partnerId, currentUserId);
             if (!result) return Forbid();
             return NoContent();
         }
@@ -101,7 +87,7 @@ namespace StudetCouncilPlannerAPI.Controllers
                 PageSize = pageSize,
                 SortByEndDateAsc = sortByEndDateAsc
             };
-            var result = await _taskService.GetUserTasksAsync(filter);
+            var result = await taskService.GetUserTasksAsync(filter);
             return Ok(result);
         }
 
@@ -117,7 +103,7 @@ namespace StudetCouncilPlannerAPI.Controllers
                 PageSize = pageSize,
                 SortByEndDateAsc = sortByEndDateAsc
             };
-            var result = await _taskService.GetEventTasksAsync(filter);
+            var result = await taskService.GetEventTasksAsync(filter);
             return Ok(result);
         }
 
@@ -133,7 +119,7 @@ namespace StudetCouncilPlannerAPI.Controllers
                 PageSize = pageSize,
                 SortByEndDateAsc = sortByEndDateAsc
             };
-            var result = await _taskService.GetPartnerTasksAsync(filter);
+            var result = await taskService.GetPartnerTasksAsync(filter);
             return Ok(result);
         }
 

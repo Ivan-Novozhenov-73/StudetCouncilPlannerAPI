@@ -1458,6 +1458,22 @@
           "build/Swashbuckle.AspNetCore.props": {}
         }
       },
+      "Swashbuckle.AspNetCore.ReDoc/8.1.4": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Swashbuckle.AspNetCore.ReDoc.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Swashbuckle.AspNetCore.ReDoc.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
       "Swashbuckle.AspNetCore.Swagger/6.6.2": {
         "type": "package",
         "dependencies": {
@@ -4343,6 +4359,27 @@
         "swashbuckle.aspnetcore.nuspec"
       ]
     },
+    "Swashbuckle.AspNetCore.ReDoc/8.1.4": {
+      "sha512": "kYtQK9j4ABBPfAbFj4N7s5j0yIeo0f+IWMu+gnLyqa+FiruVKQTXL+K/HJllSnG4VhVfVW3rg3ctactFuHap3w==",
+      "type": "package",
+      "path": "swashbuckle.aspnetcore.redoc/8.1.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net8.0/Swashbuckle.AspNetCore.ReDoc.dll",
+        "lib/net8.0/Swashbuckle.AspNetCore.ReDoc.pdb",
+        "lib/net8.0/Swashbuckle.AspNetCore.ReDoc.xml",
+        "lib/net9.0/Swashbuckle.AspNetCore.ReDoc.dll",
+        "lib/net9.0/Swashbuckle.AspNetCore.ReDoc.pdb",
+        "lib/net9.0/Swashbuckle.AspNetCore.ReDoc.xml",
+        "lib/netstandard2.0/Swashbuckle.AspNetCore.ReDoc.dll",
+        "lib/netstandard2.0/Swashbuckle.AspNetCore.ReDoc.pdb",
+        "lib/netstandard2.0/Swashbuckle.AspNetCore.ReDoc.xml",
+        "package-readme.md",
+        "swashbuckle.aspnetcore.redoc.8.1.4.nupkg.sha512",
+        "swashbuckle.aspnetcore.redoc.nuspec"
+      ]
+    },
     "Swashbuckle.AspNetCore.Swagger/6.6.2": {
       "sha512": "ovgPTSYX83UrQUWiS5vzDcJ8TEX1MAxBgDFMK45rC24MorHEPQlZAHlaXj/yth4Zf6xcktpUgTEBvffRQVwDKA==",
       "type": "package",
@@ -5191,6 +5228,7 @@
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.4",
       "QuestPDF >= 2025.5.1",
       "Swashbuckle.AspNetCore >= 6.6.2",
+      "Swashbuckle.AspNetCore.ReDoc >= 8.1.4",
       "System.IdentityModel.Tokens.Jwt >= 8.12.0"
     ]
   },
@@ -5277,6 +5315,10 @@
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.6.2, )"
+          },
+          "Swashbuckle.AspNetCore.ReDoc": {
+            "target": "Package",
+            "version": "[8.1.4, )"
           },
           "System.IdentityModel.Tokens.Jwt": {
             "target": "Package",

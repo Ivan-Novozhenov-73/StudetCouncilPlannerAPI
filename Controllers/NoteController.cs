@@ -2,44 +2,31 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Services;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class NoteController : ControllerBase
+    [ApiController, Route("api/[controller]")]
+    public class NoteController(NoteService noteService) : ControllerBase
     {
-        private readonly NoteService _noteService;
-
-        public NoteController(NoteService noteService)
-        {
-            _noteService = noteService;
-        }
-
         // Получить список заметок для мероприятия
-        [HttpGet("event/{eventId}")]
-        [Authorize]
+        [HttpGet("event/{eventId}"), Authorize]
         public async Task<ActionResult<List<NoteShortDto>>> GetNotesByEvent(Guid eventId)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var hasAccess = await _noteService.IsOrganizerOrChiefAsync(eventId, userId.Value);
+            var hasAccess = await noteService.IsOrganizerOrChiefAsync(eventId, userId.Value);
             if (!hasAccess)
                 return Forbid("Недостаточно прав для просмотра заметок этого мероприятия.");
 
-            var notes = await _noteService.GetNotesByEventAsync(eventId);
+            var notes = await noteService.GetNotesByEventAsync(eventId);
             return Ok(notes);
         }
 
         // Получить заметку по id
-        [HttpGet("{noteId}")]
-        [Authorize]
+        [HttpGet("{noteId}"), Authorize]
         public async Task<ActionResult<NoteDetailDto>> GetNoteById(Guid noteId)
         {
             var userId = GetUserIdFromToken();
@@ -47,11 +34,11 @@ namespace StudetCouncilPlannerAPI.Controllers
                 return Unauthorized();
 
             // Получаем заметку чтобы узнать EventId
-            var note = await _noteService.GetNoteByIdAsync(noteId);
+            var note = await noteService.GetNoteByIdAsync(noteId);
             if (note == null)
                 return NotFound();
 
-            var hasAccess = await _noteService.IsOrganizerOrChiefAsync(note.EventId, userId.Value);
+            var hasAccess = await noteService.IsOrganizerOrChiefAsync(note.EventId, userId.Value);
             if (!hasAccess)
                 return Forbid("Недостаточно прав для просмотра этой заметки.");
 
@@ -59,15 +46,14 @@ namespace StudetCouncilPlannerAPI.Controllers
         }
 
         // Создать заметку (только организатор/главный организатор)
-        [HttpPost]
-        [Authorize]
+        [HttpPost, Authorize]
         public async Task<ActionResult<Guid>> CreateNote([FromBody] NoteCreateDto dto)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var noteId = await _noteService.CreateNoteAsync(dto, userId.Value);
+            var noteId = await noteService.CreateNoteAsync(dto, userId.Value);
             if (noteId == null)
                 return Forbid("Недостаточно прав или ошибка создания.");
 
@@ -75,15 +61,14 @@ namespace StudetCouncilPlannerAPI.Controllers
         }
 
         // Редактировать заметку (только организатор/главный организатор)
-        [HttpPut("{noteId}")]
-        [Authorize]
+        [HttpPut("{noteId}"), Authorize]
         public async Task<IActionResult> UpdateNote(Guid noteId, [FromBody] NoteUpdateDto dto)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var success = await _noteService.UpdateNoteAsync(noteId, dto, userId.Value);
+            var success = await noteService.UpdateNoteAsync(noteId, dto, userId.Value);
             if (!success)
                 return Forbid("Недостаточно прав или заметка не найдена.");
 

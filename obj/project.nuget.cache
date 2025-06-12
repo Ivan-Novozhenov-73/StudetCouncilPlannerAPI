@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "8mjaWhoKCjA=",
+  "dgSpecHash": "g2vh6F6EwLI=",
   "success": true,
   "projectFilePath": "/Users/ilyaantonov/Downloads/four_course/IVAN/StudetCouncilPlannerAPI/StudetCouncilPlannerAPI.csproj",
   "expectedPackageFiles": [
@@ -70,6 +70,7 @@
     "/Users/ilyaantonov/.nuget/packages/npgsql.entityframeworkcore.postgresql/9.0.4/npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
     "/Users/ilyaantonov/.nuget/packages/questpdf/2025.5.1/questpdf.2025.5.1.nupkg.sha512",
     "/Users/ilyaantonov/.nuget/packages/swashbuckle.aspnetcore/6.6.2/swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
+    "/Users/ilyaantonov/.nuget/packages/swashbuckle.aspnetcore.redoc/8.1.4/swashbuckle.aspnetcore.redoc.8.1.4.nupkg.sha512",
     "/Users/ilyaantonov/.nuget/packages/swashbuckle.aspnetcore.swagger/6.6.2/swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",
     "/Users/ilyaantonov/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.6.2/swashbuckle.aspnetcore.swaggergen.6.6.2.nupkg.sha512",
     "/Users/ilyaantonov/.nuget/packages/swashbuckle.aspnetcore.swaggerui/6.6.2/swashbuckle.aspnetcore.swaggerui.6.6.2.nupkg.sha512",

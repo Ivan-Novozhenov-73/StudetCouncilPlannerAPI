@@ -2,34 +2,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudetCouncilPlannerAPI.Models.DTOs;
 using StudetCouncilPlannerAPI.Services;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class MeetingController : ControllerBase
+    [ApiController, Route("api/[controller]")]
+    public class MeetingController(MeetingService meetingService) : ControllerBase
     {
-        private readonly MeetingService _meetingService;
-
-        public MeetingController(MeetingService meetingService)
-        {
-            _meetingService = meetingService;
-        }
-
         // Создать встречу (только глава или председатель студсовета)
-        [HttpPost]
-        [Authorize]
+        [HttpPost, Authorize]
         public async Task<ActionResult<Guid>> CreateMeeting([FromBody] MeetingCreateDto dto)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var meetingId = await _meetingService.CreateMeetingAsync(dto, userId.Value);
+            var meetingId = await meetingService.CreateMeetingAsync(dto, userId.Value);
             if (meetingId == null)
                 return Forbid("Недостаточно прав для создания встречи.");
 
@@ -37,15 +25,14 @@ namespace StudetCouncilPlannerAPI.Controllers
         }
 
         // Добавить участника (только организатор встречи)
-        [HttpPost("{meetingId}/participants")]
-        [Authorize]
+        [HttpPost("{meetingId}/participants"), Authorize]
         public async Task<IActionResult> AddParticipant(Guid meetingId, [FromBody] MeetingAddParticipantDto dto)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var result = await _meetingService.AddParticipantAsync(meetingId, userId.Value, dto);
+            var result = await meetingService.AddParticipantAsync(meetingId, userId.Value, dto);
             if (!result)
                 return Forbid("Недостаточно прав или участник уже добавлен.");
 
@@ -53,15 +40,14 @@ namespace StudetCouncilPlannerAPI.Controllers
         }
 
         // Удалить участника (только организатор встречи)
-        [HttpDelete("{meetingId}/participants")]
-        [Authorize]
+        [HttpDelete("{meetingId}/participants"), Authorize]
         public async Task<IActionResult> RemoveParticipant(Guid meetingId, [FromBody] MeetingRemoveParticipantDto dto)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var result = await _meetingService.RemoveParticipantAsync(meetingId, userId.Value, dto);
+            var result = await meetingService.RemoveParticipantAsync(meetingId, userId.Value, dto);
             if (!result)
                 return Forbid("Недостаточно прав или нельзя удалить себя/участник не найден.");
 
@@ -69,28 +55,26 @@ namespace StudetCouncilPlannerAPI.Controllers
         }
 
         // Получить список всех встреч пользователя (по токену)
-        [HttpGet("my")]
-        [Authorize]
+        [HttpGet("my"), Authorize]
         public async Task<ActionResult<List<MeetingShortDto>>> GetMyMeetings()
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var meetings = await _meetingService.GetUserMeetingsAsync(userId.Value);
+            var meetings = await meetingService.GetUserMeetingsAsync(userId.Value);
             return Ok(meetings);
         }
 
         // Получить встречу по ID (доступ только участникам и организатору)
-        [HttpGet("{meetingId}")]
-        [Authorize]
+        [HttpGet("{meetingId}"), Authorize]
         public async Task<ActionResult<MeetingDetailDto>> GetMeetingById(Guid meetingId)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized();
 
-            var meeting = await _meetingService.GetMeetingByIdAsync(meetingId, userId.Value);
+            var meeting = await meetingService.GetMeetingByIdAsync(meetingId, userId.Value);
             if (meeting == null)
                 return Forbid("Недостаточно прав или встреча не найдена.");
 

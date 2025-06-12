@@ -7,17 +7,9 @@ using System.Security.Claims;
 
 namespace StudetCouncilPlannerAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    [ApiController, Route("api/[controller]")]
+    public class UserController(UserService userService) : ControllerBase
     {
-        private readonly UserService _userService;
-
-        public UserController(UserService userService)
-        {
-            _userService = userService;
-        }
-
         // Вспомогательный метод: получить текущего пользователя из токена/контекста
         private User GetCurrentUser()
         {
@@ -53,7 +45,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         [Authorize]
         public async Task<ActionResult<List<UserDto>>> GetUsers([FromQuery] UserListQueryDto query)
         {
-            var users = await _userService.GetUsersAsync(query);
+            var users = await userService.GetUsersAsync(query);
             return Ok(users);
         }
 
@@ -64,7 +56,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         [Authorize]
         public async Task<ActionResult<UserDto>> GetUserById([FromRoute] Guid id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
+            var user = await userService.GetUserByIdAsync(id);
             if (user == null)
                 return NotFound();
             return Ok(user);
@@ -78,7 +70,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<IActionResult> UpdateUser([FromRoute] Guid id, [FromBody] UserUpdateDto dto)
         {
             var currentUser = GetCurrentUser();
-            var result = await _userService.UpdateUserAsync(id, dto, currentUser);
+            var result = await userService.UpdateUserAsync(id, dto, currentUser);
             if (!result)
                 return Forbid();
             return NoContent();
@@ -92,7 +84,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<IActionResult> ArchiveUser([FromRoute] Guid id)
         {
             var currentUser = GetCurrentUser();
-            var result = await _userService.ArchiveUserAsync(id, currentUser);
+            var result = await userService.ArchiveUserAsync(id, currentUser);
             if (!result)
                 return Forbid();
             return NoContent();
@@ -106,7 +98,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<IActionResult> RestoreUser([FromRoute] Guid id)
         {
             var currentUser = GetCurrentUser();
-            var result = await _userService.RestoreUserAsync(id, currentUser);
+            var result = await userService.RestoreUserAsync(id, currentUser);
             if (!result)
                 return Forbid();
             return NoContent();
@@ -120,7 +112,7 @@ namespace StudetCouncilPlannerAPI.Controllers
         public async Task<IActionResult> ChangeUserRole([FromRoute] Guid id, [FromBody] UserChangeRoleDto dto)
         {
             var currentUser = GetCurrentUser();
-            var result = await _userService.ChangeUserRoleAsync(id, dto.NewRole, currentUser);
+            var result = await userService.ChangeUserRoleAsync(id, dto.NewRole, currentUser);
             if (!result)
                 return Forbid();
             return NoContent();
